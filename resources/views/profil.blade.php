@@ -395,6 +395,7 @@
         <section class="page">
             <div class="heading">
                 <h1>Profil</h1>
+                @if (session('status'))<p class="success-message">{{ session('status') }}</p>@endif
 
                 <a class="gear-link"
                    href="{{ route('profil.edit') }}"
@@ -447,7 +448,7 @@
                             </div>
                             <div class="info-item">
                                 <span>Nomor telepon</span>
-                                <div class="info-value">Belum ditambahkan</div>
+                                <div class="info-value">{{ auth()->user()?->phone ?: 'Belum ditambahkan' }}</div>
                             </div>
                             <div class="info-item">
                                 <span>Kota / kabupaten</span>

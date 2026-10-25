@@ -130,6 +130,8 @@
         }
 
         .topbar {
+            position: relative;
+            z-index: 1100;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -275,11 +277,16 @@
         }
 
         .update-item {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
             padding: 12px 0;
             border-bottom: 1px solid #edf0ed;
         }
 
         .update-item:last-child { border-bottom: 0; }
+        .update-item:hover h3 { color: var(--teal); }
 
         .tag {
             display: inline-block;
@@ -489,6 +496,7 @@
         }
         .notification-wrap {
             position: relative;
+            z-index: 1101;
         }
 
         .notification-toggle {
@@ -500,6 +508,8 @@
             width: 18px;
             height: 18px;
         }
+
+        .notification-badge[hidden] { display: none !important; }
 
         .notification-badge {
             position: absolute;
@@ -520,7 +530,7 @@
 
         .notification-menu {
             position: absolute;
-            z-index: 20;
+            z-index: 1102;
             top: calc(100% + 12px);
             right: 0;
             width: min(350px, calc(100vw - 32px));
@@ -560,11 +570,12 @@
         }
 
         .notification-list {
-            max-height: 330px;
+            max-height: min(330px, calc(100vh - 220px));
             overflow-y: auto;
         }
 
         .notification-item {
+            text-decoration: none;
             width: 100%;
             display: flex;
             align-items: flex-start;
@@ -669,6 +680,8 @@
             .main { padding: 20px 14px; }
 
             .topbar {
+            position: relative;
+            z-index: 1100;
                 align-items: flex-start;
                 flex-direction: column;
             }
@@ -841,7 +854,7 @@
                         stroke="currentColor" stroke-width="1.7"
                         stroke-linecap="round"/>
                 </svg>
-                <span class="notification-badge" id="notificationCount">3</span>
+                <span class="notification-badge" id="notificationCount" @if ($unreadNotifications === 0) hidden @endif>{{ $unreadNotifications }}</span>
             </button>
 
             <section
@@ -852,39 +865,25 @@
             >
                 <header class="notification-header">
                     <h2>Notifikasi</h2>
-                    <button type="button" id="markAllRead">Tandai dibaca</button>
+                    @auth<form method="POST" action="{{ route('notifications.read-all') }}">@csrf<button type="submit" id="markAllRead">Tandai dibaca</button></form>@endauth
                 </header>
 
                 <div class="notification-list">
-                    <button class="notification-item unread" type="button">
-                        <span class="notification-dot"></span>
-                        <span class="notification-copy">
-                            <strong>Banjir melanda sejumlah wilayah</strong>
-                            <span>Pembaruan kejadian banjir tersedia.</span>
-                            <time>Hari ini · 10.08 WIB</time>
-                        </span>
-                    </button>
-
-                    <button class="notification-item unread" type="button">
-                        <span class="notification-dot"></span>
-                        <span class="notification-copy">
-                            <strong>Gunung Anak Krakatau kembali erupsi</strong>
-                            <span>Status kejadian sedang dipantau.</span>
-                            <time>6 Okt 2025 · 15.36 WIB</time>
-                        </span>
-                    </button>
-
-                    <button class="notification-item unread" type="button">
-                        <span class="notification-dot"></span>
-                        <span class="notification-copy">
-                            <strong>Gempa magnitudo 6,3 mengguncang NTT</strong>
-                            <span>Lihat informasi dan wilayah terdampak.</span>
-                            <time>4 Okt 2025 · 08.40 WIB</time>
-                        </span>
-                    </button>
+                    @forelse ($notifications as $notification)
+                        <a class="notification-item {{ $notification->is_read ? '' : 'unread' }}" href="{{ route('bencana.index') }}">
+                            <span class="notification-dot"></span>
+                            <span class="notification-copy">
+                                <strong>{{ $notification->title }}</strong>
+                                <span>{{ $notification->message }}</span>
+                                <time>{{ $notification->created_at ? \Illuminate\Support\Carbon::parse($notification->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Baru saja' }}</time>
+                            </span>
+                        </article>
+                    @empty
+                        <p class="notification-empty">Belum ada notifikasi.</p>
+                    @endforelse
                 </div>
 
-                <a class="notification-footer" href="#updates">
+                <a class="notification-footer" href="{{ route('bencana.index') }}">
                     Lihat update terbaru
                 </a>
             </section>
@@ -898,19 +897,19 @@
         <section class="stats" aria-label="Ringkasan bencana">
             <article class="stat-card red">
                 <span>Kejadian aktif</span>
-                <strong>[01]</strong>
+                <strong>[{{ $stats['active'] }}]</strong>
             </article>
             <article class="stat-card orange">
                 <span>Sedang dipantau</span>
-                <strong>[02]</strong>
+                <strong>[{{ $stats['monitored'] }}]</strong>
             </article>
             <article class="stat-card blue">
                 <span>Wilayah terdampak</span>
-                <strong>[10]</strong>
+                <strong>[{{ $stats['areas'] }}]</strong>
             </article>
             <article class="stat-card blue">
                 <span>Pembaruan terakhir</span>
-                <strong>[10.08]</strong>
+                <strong>[{{ $stats['latest'] }}]</strong>
             </article>
         </section>
 
@@ -918,27 +917,19 @@
             <article class="panel" id="updates">
                 <div class="panel-heading">
                     <h2>Update terbaru</h2>
-                    <a href="#updates">Lihat semua</a>
+                    <a href="{{ route('bencana.index') }}">Lihat semua</a>
                 </div>
 
                 <div class="updates">
-                    <article class="update-item">
-                        <span class="tag">Banjir</span>
-                        <h3>Banjir melanda sejumlah wilayah</h3>
-                        <p>Hari ini · 10.08 WIB</p>
-                    </article>
-
-                    <article class="update-item">
-                        <span class="tag">Gunung Meletus</span>
-                        <h3>Gunung Anak Krakatau kembali erupsi</h3>
-                        <p>6 Okt 2025 · 15.36 WIB</p>
-                    </article>
-
-                    <article class="update-item">
-                        <span class="tag orange">Gempa</span>
-                        <h3>Gempa magnitudo 6,3 guncang NTT</h3>
-                        <p>4 Okt 2025 · 08.40 WIB</p>
-                    </article>
+                    @forelse ($disasters->take(5) as $disaster)
+                        <a class="update-item" href="{{ route('bencana.detail', $disaster->id) }}">
+                            <span class="tag">{{ $disaster->category }}</span>
+                            <h3>{{ $disaster->title }}</h3>
+                            <p>{{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB · {{ $disaster->location }}</p>
+                        </a>
+                    @empty
+                        <p class="updates-empty">Belum ada kejadian bencana di database.</p>
+                    @endforelse
                 </div>
             </article>
 
@@ -955,52 +946,27 @@
 <script>
     const notificationToggle = document.getElementById('notificationToggle');
     const notificationMenu = document.getElementById('notificationMenu');
-    const notificationCount = document.getElementById('notificationCount');
-    const markAllRead = document.getElementById('markAllRead');
 
-    function updateNotificationCount() {
-        const unreadCount = document.querySelectorAll(
-            '.notification-item.unread'
-        ).length;
-
-        notificationCount.textContent = unreadCount;
-        notificationCount.hidden = unreadCount === 0;
+    function closeNotifications() {
+        notificationMenu.hidden = true;
+        notificationToggle.setAttribute('aria-expanded', 'false');
     }
 
-    notificationToggle.addEventListener('click', function () {
-        const isOpening = notificationMenu.hidden;
-
-        notificationMenu.hidden = !isOpening;
-        notificationToggle.setAttribute('aria-expanded', String(isOpening));
+    notificationToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const open = notificationMenu.hidden;
+        notificationMenu.hidden = !open;
+        notificationToggle.setAttribute('aria-expanded', String(open));
     });
 
-    document.querySelectorAll('.notification-item').forEach(function (item) {
-        item.addEventListener('click', function () {
-            item.classList.remove('unread');
-            updateNotificationCount();
-        });
+    notificationMenu.addEventListener('click', function (event) {
+        event.stopPropagation();
     });
 
-    markAllRead.addEventListener('click', function () {
-        document.querySelectorAll('.notification-item').forEach(function (item) {
-            item.classList.remove('unread');
-        });
-
-        updateNotificationCount();
-    });
-
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.notification-wrap')) {
-            notificationMenu.hidden = true;
-            notificationToggle.setAttribute('aria-expanded', 'false');
-        }
-    });
+    document.addEventListener('click', closeNotifications);
 
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            notificationMenu.hidden = true;
-            notificationToggle.setAttribute('aria-expanded', 'false');
-        }
+        if (event.key === 'Escape') closeNotifications();
     });
 </script>
 
@@ -1014,9 +980,22 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
 
-    L.marker([-6.2, 106.8])
-        .addTo(map)
-        .bindPopup('Contoh kejadian: Jakarta');
+    const disasterPoints = @json($mapDisasters);
+
+    function makeDisasterPopup(disaster) {
+        const content = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = disaster.title;
+        const location = document.createElement('div');
+        location.textContent = disaster.location;
+        content.append(title, location);
+        return content;
+    }
+    disasterPoints.forEach(function (disaster) {
+        L.marker([disaster.latitude, disaster.longitude])
+            .addTo(map)
+            .bindPopup(makeDisasterPopup(disaster));
+    });
 </script>
 </body>
 </html>

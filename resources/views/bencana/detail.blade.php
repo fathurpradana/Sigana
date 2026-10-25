@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $bencana['judul'] }} | SIGANA</title>
+    <title>{{ $disaster->title }} | SIGANA</title>
 
     <style>
         * { box-sizing: border-box; }
@@ -131,6 +131,7 @@
             font-size: 70px;
         }
 
+        .hero img { width: 100%; height: 100%; object-fit: cover; }
         .detail-content { padding: 14px 22px 4px; }
 
         .status {
@@ -373,40 +374,46 @@
     <main class="main">
         <a class="back-link" href="{{ route('bencana.index') }}">← Kembali ke informasi bencana</a>
 
+        @php
+            $imageUrl = $disaster->photo ? (\Illuminate\Support\Str::startsWith($disaster->photo, ['http://', 'https://', '/']) ? $disaster->photo : asset('storage/' . $disaster->photo)) : null;
+            $categoryName = \Illuminate\Support\Str::lower($disaster->category);
+            $sceneEmoji = str_contains($categoryName, 'gempa') ? '🏚️' : (str_contains($categoryName, 'banjir') || str_contains($categoryName, 'tsunami') ? '🌊' : '🌋');
+        @endphp
         <article class="detail-card">
-            <div class="hero" role="img" aria-label="{{ $bencana['kategori'] }}">
-                @if ($bencana['kategori'] === 'Gunung Meletus')
-                    🌋
-                @elseif ($bencana['kategori'] === 'Gempa')
-                    🏚️
+            <div class="hero" role="img" aria-label="{{ $disaster->category }}">
+                @if ($imageUrl)
+                    <img src="{{ $imageUrl }}" alt="{{ $disaster->title }}">
                 @else
-                    🌊
+                    {{ $sceneEmoji }}
                 @endif
             </div>
 
             <div class="detail-content">
-                <span class="status">
-                    {{ $bencana['kategori'] }} · {{ $bencana['status'] }}
-                </span>
+                <span class="status">{{ $disaster->category }} · {{ $disaster->status }}</span>
 
-                <h1>{{ $bencana['judul'] }}</h1>
+                <h1>{{ $disaster->title }}</h1>
 
                 <p class="meta">
-                    {{ $bencana['waktu'] }} · {{ $bencana['wilayah'] }}
+                    {{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB
+                    · {{ $disaster->location }}
                 </p>
 
-                <p class="description">{{ $bencana['deskripsi'] }}</p>
+                <p class="description">{{ $disaster->description ?: 'Belum ada keterangan untuk kejadian ini.' }}</p>
 
                 <section class="advice">
-                    <h2>Imbauan</h2>
-                    <ul>
-                        @foreach ($bencana['imbauan'] as $imbauan)
-                            <li>
-                                <span class="check">✓</span>
-                                <span>{{ $imbauan }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
+                    <h2>Imbauan keselamatan</h2>
+                    @if ($mitigations->isNotEmpty())
+                        <ul>
+                            @foreach ($mitigations as $mitigation)
+                                <li>
+                                    <span class="check">✓</span>
+                                    <span><strong>{{ $mitigation->title }}</strong>@if ($mitigation->content) — {{ $mitigation->content }}@endif</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p>Belum ada imbauan khusus yang tersimpan untuk kategori {{ $disaster->category }}.</p>
+                    @endif
                 </section>
 
                 <a class="emergency-button" href="tel:112">

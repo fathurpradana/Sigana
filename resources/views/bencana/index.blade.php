@@ -233,6 +233,8 @@
                 linear-gradient(180deg, #9dc9d2, #5598ae);
         }
 
+        .scene img { width: 100%; height: 100%; object-fit: cover; }
+
         .scene-emoji {
             position: relative;
             z-index: 1;
@@ -491,90 +493,58 @@
             <label class="search">
                 <span aria-hidden="true">⌕</span>
                 <input id="searchInput" type="search"
-                       placeholder="Cari kejadian atau wilayah">
+                       placeholder="Cari kejadian atau wilayah" value="{{ request('q') }}">
             </label>
         </header>
 
         <nav class="filters" aria-label="Filter kategori bencana">
             <button class="filter-button active" type="button" data-filter="semua">Semua</button>
-            <button class="filter-button" type="button" data-filter="banjir">Banjir</button>
-            <button class="filter-button" type="button" data-filter="gunung meletus">Gunung meletus</button>
-            <button class="filter-button" type="button" data-filter="gempa">Gempa</button>
-            <button class="filter-button" type="button" data-filter="tsunami">Tsunami</button>
+            @foreach ($categories as $category)
+                <button class="filter-button" type="button" data-filter="{{ \Illuminate\Support\Str::lower($category->name) }}">
+                    {{ $category->name }}
+                </button>
+            @endforeach
         </nav>
 
         <section class="cards" id="disasterCards">
+            @forelse ($disasters as $disaster)
+                @php
+                    $categoryName = \Illuminate\Support\Str::lower($disaster->category);
+                    $sceneClass = str_contains($categoryName, 'gempa') ? 'scene-earthquake' : (str_contains($categoryName, 'banjir') ? 'scene-flood' : (str_contains($categoryName, 'tsunami') ? 'scene-tsunami' : 'scene-volcano'));
+                    $sceneEmoji = str_contains($categoryName, 'gempa') ? '🏚️' : (str_contains($categoryName, 'banjir') || str_contains($categoryName, 'tsunami') ? '🌊' : '🌋');
+                    $imageUrl = $disaster->photo ? (\Illuminate\Support\Str::startsWith($disaster->photo, ['http://', 'https://', '/']) ? $disaster->photo : asset('storage/' . $disaster->photo)) : null;
+                @endphp
                 <a class="card"
-                    href="{{ route('bencana.detail', 'gunung-anak-krakatau') }}"
-                    data-category="gunung meletus"
-                    data-search="gunung anak krakatau selat sunda erupsi">
-                <div class="scene scene-volcano" role="img" aria-label="Ilustrasi gunung meletus">
-                    <span class="scene-emoji">🌋</span>
-                </div>
-                <div class="card-body">
-                    <div class="card-meta">
-                        <span class="tag">Gunung Meletus</span>
-                        <time>6 Okt 2025 · 15.36 WIB</time>
+                   href="{{ route('bencana.detail', $disaster->id) }}"
+                   data-category="{{ $categoryName }}"
+                   data-search="{{ \Illuminate\Support\Str::lower($disaster->title . ' ' . $disaster->location . ' ' . $disaster->category) }}">
+                    <div class="scene {{ $sceneClass }}" role="img" aria-label="{{ $disaster->category }}">
+                        @if ($imageUrl)
+                            <img src="{{ $imageUrl }}" alt="{{ $disaster->title }}">
+                        @else
+                            <span class="scene-emoji">{{ $sceneEmoji }}</span>
+                        @endif
                     </div>
-                    <h2>Gunung Anak Krakatau Kembali Erupsi</h2>
-                    <p>Erupsi disertai abu vulkanik. Masyarakat diimbau menjauhi radius bahaya dan mengikuti arahan petugas.</p>
-                </div>
-            </a>
-
-                <a class="card"
-                    href="{{ route('bencana.detail', 'gempa-ntt') }}"
-                    data-category="gempa"
-                    data-search="gempa magnitudo 6,3 guncang ntt nusa tenggara timur">
-                <div class="scene scene-earthquake" role="img" aria-label="Ilustrasi dampak gempa">
-                    <span class="scene-emoji">🏚️</span>
-                </div>
-                <div class="card-body">
-                    <div class="card-meta">
-                        <span class="tag gempa">Gempa</span>
-                        <time>4 Okt 2025 · 08.40 WIB</time>
+                    <div class="card-body">
+                        <div class="card-meta">
+                            <span class="tag">{{ $disaster->category }}</span>
+                            <time>{{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB</time>
+                        </div>
+                        <h2>{{ $disaster->title }}</h2>
+                        <p>{{ \Illuminate\Support\Str::limit($disaster->description ?: $disaster->location, 150) }}</p>
                     </div>
-                    <h2>Gempa Magnitudo 6,3 Guncang NTT</h2>
-                    <p>Getaran dirasakan di sejumlah wilayah. Warga diimbau tetap tenang dan memantau informasi resmi.</p>
+                </a>
+            @empty
+                <div class="empty-state" id="emptyState" style="display:block">
+                    Belum ada data kejadian bencana. Informasi akan tampil di sini setelah data ditambahkan.
                 </div>
-            </a>
+            @endforelse
 
-                <a class="card"
-                    href="{{ route('bencana.detail', 'banjir-wilayah') }}"
-                    data-category="banjir"
-                    data-search="banjir melanda sejumlah wilayah jakarta jawa barat">
-                <div class="scene scene-flood" role="img" aria-label="Ilustrasi banjir">
-                    <span class="scene-emoji">🌊</span>
+            @if ($disasters->isNotEmpty())
+                <div class="empty-state" id="emptyState">
+                    Tidak ada informasi bencana yang cocok dengan pencarian.
                 </div>
-                <div class="card-body">
-                    <div class="card-meta">
-                        <span class="tag banjir">Banjir</span>
-                        <time>Hari ini</time>
-                    </div>
-                    <h2>Banjir Melanda Sejumlah Wilayah</h2>
-                    <p>Masyarakat dibantu untuk tetap tenang dan memantau titik evakuasi terdekat.</p>
-                </div>
-            </a>
-
-                <a class="card"
-                    href="{{ route('bencana.detail', 'gunung-anak-krakatau') }}"
-                    data-category="tsunami"
-                    data-search="informasi kesiapsiagaan tsunami pesisir">
-                <div class="scene scene-tsunami" role="img" aria-label="Ilustrasi gelombang laut">
-                    <span class="scene-emoji">🌊</span>
-                </div>
-                <div class="card-body">
-                    <div class="card-meta">
-                        <span class="tag tsunami">Tsunami</span>
-                        <time>Informasi kesiapsiagaan</time>
-                    </div>
-                    <h2>Kenali Tanda Peringatan Tsunami</h2>
-                    <p>Segera menjauhi pantai jika merasakan gempa kuat atau menerima peringatan resmi.</p>
-                </div>
-            </a>
-
-            <div class="empty-state" id="emptyState">
-                Tidak ada informasi bencana yang cocok dengan pencarian.
-            </div>
+            @endif
         </section>
     </main>
 </div>

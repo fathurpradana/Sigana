@@ -325,36 +325,41 @@
             <section class="edit-card">
                 <h2>Informasi pribadi</h2>
 
+                @if (session('status'))<p class="success-message">{{ session('status') }}</p>@endif
+                <form method="POST" action="{{ route('profil.update') }}">
+                    @csrf
+                    @method('PUT')
                 <div class="fields">
                     <label>
                         Nama lengkap
-                        <input type="text"
-                               value="{{ auth()->user()?->name }}"
+                        <input type="text" name="name" required
+                               value="{{ old('name', auth()->user()->name) }}"
                                placeholder="Masukkan nama lengkap">
                     </label>
 
                     <label>
                         Email
-                        <input type="email"
-                               value="{{ auth()->user()?->email }}"
+                        <input type="email" name="email" required
+                               value="{{ old('email', auth()->user()->email) }}"
                                placeholder="nama@email.com">
                     </label>
 
                     <label>
                         Nomor telepon
-                        <input type="tel" placeholder="08xx xxxx xxxx">
+                        <input type="tel" name="phone" maxlength="20" value="{{ old('phone', auth()->user()->phone) }}" placeholder="08xx xxxx xxxx">
                     </label>
 
                     <label>
                         Kota / kabupaten
-                        <input type="text" placeholder="Masukkan kota / kabupaten">
+                        <input type="text" value="Belum tersedia pada tabel users" disabled><small>Kota belum memiliki kolom di database.</small>
                     </label>
                 </div>
 
                 <div class="actions">
-                    <button class="save-button" type="button">Simpan perubahan</button>
+                    <button class="save-button" type="submit">Simpan perubahan</button>
                     <a class="cancel-button" href="{{ route('profil.index') }}">Batal</a>
                 </div>
+                </form>
             </section>
         </section>
     </main>

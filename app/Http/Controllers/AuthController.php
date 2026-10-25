@@ -19,7 +19,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials)) {
             return back()
                 ->withErrors(['email' => 'Email atau kata sandi tidak sesuai.'])
                 ->onlyInput('email');
@@ -44,10 +44,8 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('dashboard');
+        return redirect()->route('login')
+    ->with('status', 'Pendaftaran berhasil. Silakan masuk dengan akun Anda.');
     }
 
     public function logout(Request $request)

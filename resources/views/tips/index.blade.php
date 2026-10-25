@@ -131,6 +131,8 @@
             margin-top: auto;
         }
 
+        .tips-empty, .contacts-empty { padding: 22px; color: var(--muted); text-align: center; }
+
         .tip-card {
             min-height: 112px;
             display: flex;
@@ -353,53 +355,22 @@
 
         <div class="content">
             <section class="tips-grid" aria-label="Tips keselamatan">
-                <article class="tip-card">
-                    <span class="tip-number">1</span>
-                    <div>
-                        <h2>Tetap tenang</h2>
-                        <p>Jangan panik dan tetap ikuti informasi serta arahan dari petugas.</p>
+                @forelse ($tips as $index => $tip)
+                    <article class="tip-card">
+                        <span class="tip-number">{{ $index + 1 }}</span>
+                        <div>
+                            @if ($tip->category)
+                                <small>{{ $tip->category }} · {{ $tip->phase }}</small>
+                            @endif
+                            <h2>{{ $tip->title }}</h2>
+                            <p>{{ $tip->content }}</p>
+                        </div>
+                    </article>
+                @empty
+                    <div class="tips-empty">
+                        Belum ada tips keselamatan di database. Konten akan tampil setelah data mitigasi ditambahkan.
                     </div>
-                </article>
-
-                <article class="tip-card">
-                    <span class="tip-number">2</span>
-                    <div>
-                        <h2>Cari tempat aman</h2>
-                        <p>Segera menjauhi bangunan berisiko roboh, pohon besar, dan tiang listrik.</p>
-                    </div>
-                </article>
-
-                <article class="tip-card">
-                    <span class="tip-number">3</span>
-                    <div>
-                        <h2>Lindungi diri</h2>
-                        <p>Gunakan benda di sekitar untuk melindungi kepala dan bagian tubuh yang rentan.</p>
-                    </div>
-                </article>
-
-                <article class="tip-card">
-                    <span class="tip-number">4</span>
-                    <div>
-                        <h2>Kenali jalur evakuasi</h2>
-                        <p>Pelajari jalur evakuasi sebelum bencana dan hafalkan titik kumpul yang aman.</p>
-                    </div>
-                </article>
-
-                <article class="tip-card">
-                    <span class="tip-number">5</span>
-                    <div>
-                        <h2>Bawa barang penting</h2>
-                        <p>Siapkan tas darurat berisi makanan, obat, senter, dan dokumen penting.</p>
-                    </div>
-                </article>
-
-                <article class="tip-card">
-                    <span class="tip-number">6</span>
-                    <div>
-                        <h2>Pantau informasi resmi</h2>
-                        <p>Ikuti kabar terbaru dari BMKG, BNPB, atau petugas setempat lewat kanal resmi.</p>
-                    </div>
-                </article>
+                @endforelse
             </section>
 
             <aside class="contact-column" aria-label="Kontak darurat">
@@ -423,45 +394,18 @@
                 </a>
 
                 <div class="contacts">
-                    <a class="contact" href="tel:117">
-                        <span>
-                            <span class="contact-name">BNPB</span>
-                            <span class="contact-description">Penanggulangan bencana</span>
-                        </span>
-                        <span class="contact-number">117</span>
-                    </a>
-
-                    <a class="contact" href="tel:115">
-                        <span>
-                            <span class="contact-name">Basarnas</span>
-                            <span class="contact-description">Pencarian dan pertolongan</span>
-                        </span>
-                        <span class="contact-number">115</span>
-                    </a>
-
-                    <a class="contact" href="tel:110">
-                        <span>
-                            <span class="contact-name">Polisi</span>
-                            <span class="contact-description">Keamanan dan ketertiban</span>
-                        </span>
-                        <span class="contact-number">110</span>
-                    </a>
-
-                    <a class="contact" href="tel:113">
-                        <span>
-                            <span class="contact-name">Pemadam kebakaran</span>
-                            <span class="contact-description">Kebakaran dan penyelamatan</span>
-                        </span>
-                        <span class="contact-number">113</span>
-                    </a>
-
-                    <a class="contact" href="tel:119">
-                        <span>
-                            <span class="contact-name">PSC 119</span>
-                            <span class="contact-description">Kegawatdaruratan kesehatan</span>
-                        </span>
-                        <span class="contact-number">119</span>
-                    </a>
+                    @forelse ($contacts as $contact)
+                        @php $telephone = preg_replace('/[^0-9+]/', '', $contact->phone); @endphp
+                        <a class="contact" href="tel:{{ $telephone }}">
+                            <span>
+                                <span class="contact-name">{{ $contact->agency ?: $contact->name }}</span>
+                                <span class="contact-description">{{ $contact->description ?: $contact->name }}</span>
+                            </span>
+                            <span class="contact-number">{{ $contact->phone }}</span>
+                        </a>
+                    @empty
+                        <p class="contacts-empty">Belum ada kontak darurat tambahan di database.</p>
+                    @endforelse
                 </div>
 
                 <p class="notice">

@@ -466,31 +466,35 @@
                     Bantu petugas dengan informasi yang jelas dan akurat.
                 </p>
 
-                <form id="reportForm">
+                <form id="reportForm" method="POST" action="{{ route('bantuan.report') }}">
+                    @csrf
+                    @if (session('report_status'))<p class="form-note visible">{{ session('report_status') }}</p>@endif
+                    @if ($errors->any())<p class="form-note visible">{{ $errors->first() }}</p>@endif
                     <span class="report-label">Jenis kejadian</span>
 
                     <div class="category-options">
-                        <button class="category-button selected" type="button">Banjir</button>
-                        <button class="category-button" type="button">Gempa</button>
-                        <button class="category-button" type="button">Gunung meletus</button>
-                        <button class="category-button" type="button">Lainnya</button>
+                        @forelse ($categories as $index => $category)
+                            <button class="category-button {{ $index === 0 ? 'selected' : '' }}"
+                                    data-category-id="{{ $category->id }}" type="button">{{ $category->name }}</button>
+                        @empty
+                            <p>Kategori bencana belum tersedia.</p>
+                        @endforelse
                     </div>
 
-                    <input type="hidden" id="reportCategory" value="Banjir">
+                    <input type="hidden" name="category_id" id="reportCategory" value="{{ $categories->first()->id ?? '' }}">
 
                     <label class="report-label" for="reportLocation">Lokasi kejadian</label>
-                    <input id="reportLocation" type="text"
+                    <input id="reportLocation" name="location" type="text" value="{{ old('location') }}"
                            placeholder="Desa, kecamatan, kota" required>
 
                     <label class="report-label" for="reportDescription">Keterangan</label>
-                    <textarea id="reportDescription"
-                              placeholder="Ceritakan apa yang terjadi"
-                              required></textarea>
+                    <textarea id="reportDescription" name="description"
+                              placeholder="Ceritakan apa yang terjadi" required>{{ old('description') }}</textarea>
 
                     <button class="report-submit" type="submit">Kirim laporan</button>
 
                     <p class="form-note" id="reportNote">
-                        Laporan belum dikirim. Form ini masih berupa UI dan belum tersambung ke petugas.
+                        Laporan akan disimpan dengan status Dilaporkan dan dapat dipantau pada menu Bencana.
                     </p>
                 </form>
 
@@ -530,7 +534,7 @@
         if (lowerMessage.includes('bencana') || lowerMessage.includes('kejadian')) {
             reply = 'Buka menu Bencana untuk melihat informasi kejadian dan imbauan keselamatan.';
         } else if (lowerMessage.includes('lapor')) {
-            reply = 'Isi jenis kejadian, lokasi, dan keterangan pada form Lapor bencana. Form ini belum mengirim data ke server.';
+            reply = 'Isi jenis kejadian, lokasi, dan keterangan pada form Lapor bencana. Laporan dapat dikirim melalui formulir di halaman ini.';
         } else if (lowerMessage.includes('darurat') || lowerMessage.includes('112')) {
             reply = 'Untuk keadaan darurat, hubungi 112 atau nomor instansi terkait pada halaman Tips & Darurat.';
         } else {
@@ -549,14 +553,11 @@
             });
 
             button.classList.add('selected');
-            document.getElementById('reportCategory').value = button.textContent.trim();
+            document.getElementById('reportCategory').value = button.dataset.categoryId;
         });
     });
 
-    document.getElementById('reportForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        document.getElementById('reportNote').classList.add('visible');
-    });
+
 </script>
 </body>
 </html>
