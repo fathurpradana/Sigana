@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $bencana['judul'] }} | SIGANA</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --teal: #105361;
+            --page: #f4f5f2;
+            --text: #19373d;
+            --muted: #788889;
+            --line: #e6eae7;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: var(--page);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 240px minmax(0, 1fr);
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px 16px;
+            background: var(--teal);
+            color: white;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 8px 26px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: white;
+            color: var(--teal);
+            font-size: 20px;
+        }
+
+        .brand-name { margin: 0; font-size: 17px; }
+        .brand-caption { margin: 3px 0 0; color: #c6dfe2; font-size: 10px; }
+
+        .nav { display: grid; gap: 7px; }
+
+        .nav a {
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 12px;
+            border-radius: 9px;
+            color: #e2eff0;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .nav a:hover, .nav a.active {
+            background: rgba(255, 255, 255, .17);
+            color: white;
+        }
+
+        .emergency-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .13);
+}
+
+        .emergency-card span {
+    display: block;
+    margin: 0 0 5px;
+    color: #d0e3e5;
+    font-size: 11px;
+}
+
+.emergency-card strong {
+    display: block;
+    font-size: 20px;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+}
+
+        .main { min-width: 0; padding: 26px; }
+
+        .detail-card {
+            width: min(100%, 1000px);
+            margin: 0 auto;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: white;
+        }
+
+        .hero {
+            height: clamp(190px, 28vw, 300px);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border-radius: 12px;
+            background:
+                radial-gradient(ellipse at 57% 73%, #ffbb48 0 5%, transparent 6%),
+                radial-gradient(ellipse at 53% 92%, #222b2d 0 27%, transparent 28%),
+                linear-gradient(180deg, #414b4d, #a8614f 65%, #273336);
+            color: white;
+            font-size: 70px;
+        }
+
+        .detail-content { padding: 14px 22px 4px; }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #fff0e9;
+            color: #aa492f;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin: 14px 0;
+            color: #172d32;
+            font-size: clamp(21px, 3vw, 30px);
+            text-align: center;
+        }
+
+        .meta {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .description {
+            margin: 0 0 28px;
+            color: #526365;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .advice {
+            padding: 17px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+        }
+
+        .advice h2 {
+            margin: 0 0 12px;
+            color: #647475;
+            font-size: 11px;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+
+        .advice ul {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .advice li {
+            display: flex;
+            gap: 9px;
+            color: #526365;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .check {
+            color: var(--teal);
+            font-weight: bold;
+        }
+
+        .emergency-button {
+            display: block;
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px solid #e45a46;
+            border-radius: 24px;
+            color: #c94a37;
+            font-size: 12px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 0 0 14px 2px;
+            color: var(--teal);
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        @media (max-width: 650px) {
+            .app { display: block; }
+
+            .sidebar {
+                min-height: auto;
+                padding: 12px;
+            }
+
+            .brand { padding: 0 5px 12px; }
+
+            .nav {
+                display: flex;
+                gap: 5px;
+                overflow-x: auto;
+            }
+
+            .nav a {
+                min-width: max-content;
+                min-height: 36px;
+            }
+
+            .emergency { display: none; }
+
+            .main { padding: 14px; }
+            .detail-card { padding: 10px; }
+            .detail-content { padding: 12px 6px 4px; }
+        }
+
+        @media (min-width: 681px) {
+    html,
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .app {
+        height: 100vh;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .sidebar {
+        height: 100vh;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .main {
+        height: 100vh;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+}
+
+@media (max-width: 680px) {
+    html,
+    body {
+        height: auto;
+        overflow: auto;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .sidebar {
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+    }
+
+    .main {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+}
+
+.logout-button {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 9px;
+    background: transparent;
+    color: #e2eff0;
+    font: inherit;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+    </style>
+</head>
+
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><svg viewBox="0 0 32 32" fill="none" style="width:25px;height:25px">
+    <path d="M5 20c3 0 3-8 6-8s3 8 6 8 3-8 6-8"
+          stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="24" cy="8" r="2.5" fill="#e06445"/>
+</svg></div>
+            <div>
+                <h2 class="brand-name">SIGANA</h2>
+                <p class="brand-caption">Monitoring Bencana Alam</p>
+            </div>
+        </div>
+
+        <nav class="nav" aria-label="Menu utama">
+            <a href="{{ auth()->check() ? route('dashboard') : route('guest.home') }}">
+                <span>⌂</span> Dashboard
+            </a>
+            <a class="active" href="{{ route('bencana.index') }}">
+                <span>⚠</span> Bencana
+            </a>
+            <a href="{{ route('tips.index') }}">
+                <span>♡</span> Tips &amp; darurat
+            </a>
+            <a href="{{ route('bantuan.index') }}">
+                <span>◌</span> Bantuan
+            </a>
+            <a href="{{ route('profil.index') }}">
+    <span>♙</span> Profil
+</a>
+        </nav>
+
+       <div class="sidebar-bottom">
+    <div class="emergency-card">
+        <span>Keadaan darurat?</span>
+        <strong>112</strong>
+    </div>
+
+    @if (auth()->check())
+        <form class="logout-form" method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button class="logout-button" type="submit">Keluar dari akun</button>
+        </form>
+    @else
+        <a class="logout-button" href="{{ route('login') }}">Masuk ke akun</a>
+    @endif
+</div>
+        
+    </aside>
+
+    <main class="main">
+        <a class="back-link" href="{{ route('bencana.index') }}">← Kembali ke informasi bencana</a>
+
+        <article class="detail-card">
+            <div class="hero" role="img" aria-label="{{ $bencana['kategori'] }}">
+                @if ($bencana['kategori'] === 'Gunung Meletus')
+                    🌋
+                @elseif ($bencana['kategori'] === 'Gempa')
+                    🏚️
+                @else
+                    🌊
+                @endif
+            </div>
+
+            <div class="detail-content">
+                <span class="status">
+                    {{ $bencana['kategori'] }} · {{ $bencana['status'] }}
+                </span>
+
+                <h1>{{ $bencana['judul'] }}</h1>
+
+                <p class="meta">
+                    {{ $bencana['waktu'] }} · {{ $bencana['wilayah'] }}
+                </p>
+
+                <p class="description">{{ $bencana['deskripsi'] }}</p>
+
+                <section class="advice">
+                    <h2>Imbauan</h2>
+                    <ul>
+                        @foreach ($bencana['imbauan'] as $imbauan)
+                            <li>
+                                <span class="check">✓</span>
+                                <span>{{ $imbauan }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+
+                <a class="emergency-button" href="tel:112">
+                    Nomor darurat · 112
+                </a>
+            </div>
+        </article>
+    </main>
+</div>
+</body>
+</html>
