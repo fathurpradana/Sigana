@@ -206,7 +206,59 @@
             color: var(--teal);
             font-weight: bold;
         }
-
+        .search-wrap { position: relative; z-index: 1105; }
+        .search-wrap .search { width: min(270px, 32vw); }
+        .search-suggestions {
+            position: absolute; z-index: 1106; top: calc(100% + 8px); right: 0;
+            width: min(390px, calc(100vw - 32px)); max-height: min(420px, calc(100vh - 120px));
+            overflow-y: auto; border: 1px solid var(--line); border-radius: 14px;
+            background: white; box-shadow: 0 14px 34px rgb(20 45 50 / 16%);
+        }
+        .search-suggestions[hidden] { display: none; }
+        .search-suggestion { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px; border-bottom: 1px solid #edf0ed; color: var(--text); text-decoration: none; }
+        .search-suggestion:last-child { border-bottom: 0; }
+        .search-suggestion:hover, .search-suggestion:focus { outline: 0; background: #f2f8f8; }
+        .search-suggestion-copy { display: grid; flex: 1; min-width: 0; gap: 4px; }
+        .search-suggestion strong { display: block; overflow: hidden; font-size: 12px; line-height: 1.4; text-overflow: ellipsis; }
+        .search-suggestion .search-suggestion-meta { margin: 0; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+        .search-suggestion-dates { display: grid; gap: 2px; margin-top: 2px; }
+        .search-suggestion .search-suggestion-dates span { margin: 0; color: #899493; font-size: 9px; line-height: 1.4; }
+        .search-empty { margin: 0; padding: 16px; color: var(--muted); font-size: 12px; }
+        .user-menu-wrap { position: relative; z-index: 1103; }
+        .user-avatar { cursor: pointer; font: inherit; font-weight: bold; overflow: hidden; }
+        .user-avatar img, .profile-menu-avatar img { width: 100%; height: 100%; display: block; border-radius: 50%; object-fit: cover; }
+        .user-avatar:hover, .user-avatar[aria-expanded="true"] { background: #c9e1e4; }
+        .profile-menu {
+            position: absolute; z-index: 1104; top: calc(100% + 12px); right: 0;
+            width: min(300px, calc(100vw - 32px)); overflow: hidden;
+            border: 1px solid var(--line); border-radius: 14px; background: white;
+            box-shadow: 0 12px 35px rgb(20 45 50 / 16%);
+        }
+        .profile-menu[hidden] { display: none; }
+        .profile-menu-heading { display: flex; align-items: center; gap: 12px; padding: 17px; border-bottom: 1px solid var(--line); }
+        .profile-menu-avatar {
+            width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center;
+            border-radius: 50%; background: #dcebed; color: var(--teal); font-size: 17px; font-weight: bold;
+        }
+        .profile-menu-identity { min-width: 0; }
+        .profile-menu-identity strong, .profile-menu-identity span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-menu-identity strong { font-size: 13px; }
+        .profile-menu-identity span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+        .profile-menu-links { padding: 7px; }
+        .profile-menu-links a, .profile-menu-links button {
+            width: 100%; display: block; padding: 11px 10px; border: 0; border-radius: 8px;
+            background: transparent; color: var(--text); font: inherit; font-size: 12px;
+            text-align: left; text-decoration: none; cursor: pointer;
+        }
+        .profile-menu-links a:hover, .profile-menu-links button:hover { background: #f2f7f6; }
+        .profile-menu-links .profile-logout { color: #c84b37; }
+        .profile-menu-links .profile-login {
+            background: var(--teal);
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+        .profile-menu-links .profile-login:hover { background: var(--teal-dark); }
         .stats {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -277,7 +329,9 @@
         }
 
         .update-item {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 11px;
             color: inherit;
             text-decoration: none;
             cursor: pointer;
@@ -287,6 +341,28 @@
 
         .update-item:last-child { border-bottom: 0; }
         .update-item:hover h3 { color: var(--teal); }
+
+        .update-thumb, .search-suggestion-thumb {
+            width: 62px;
+            height: 58px;
+            flex: 0 0 62px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border-radius: 9px;
+            background: linear-gradient(145deg, #d7ecee, #a9d9ed);
+            color: var(--teal);
+            font-size: 22px;
+        }
+        .search-suggestion-thumb { margin: 0; }
+        .update-thumb img, .search-suggestion-thumb img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        .update-copy { min-width: 0; flex: 1; }
+        .update-copy .tag { margin-bottom: 5px; }
 
         .tag {
             display: inline-block;
@@ -317,13 +393,45 @@
             font-size: 10px;
         }
 
-        /* Panel peta ilustratif */
         .map-panel {
-            position: relative;
+            display: flex;
             min-height: 420px;
-            background: #a9d9ed;
+            flex-direction: column;
+            background: white;
         }
-
+        .map-panel .panel-heading { flex: 0 0 auto; padding: 16px 18px 13px; }
+        .map-heading-copy h2 { margin: 0; font-size: 15px; }
+        .map-heading-copy p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+        .map-region { padding: 6px 10px; border: 1px solid var(--line); border-radius: 20px; color: var(--teal); font-size: 10px; font-weight: bold; }
+        .map-stage { position: relative; min-height: 0; flex: 1; overflow: hidden; }
+        #sigana-map { width: 100%; height: 380px; background: #e8f1f3; }
+        #sigana-map .leaflet-tile-pane { filter: saturate(.82) contrast(.97); }
+        #sigana-map .leaflet-control-zoom { overflow: hidden; border: 1px solid #dce5e3; border-radius: 10px; box-shadow: 0 4px 14px rgb(25 55 61 / 14%); }
+        #sigana-map .leaflet-control-zoom a { width: 32px; height: 32px; color: var(--teal); line-height: 32px; }
+        #sigana-map .leaflet-control-attribution { padding: 3px 7px; border-radius: 7px 0 0 0; background: rgb(255 255 255 / 88%); font-size: 9px; }
+        #sigana-map .leaflet-popup-content-wrapper { border-radius: 11px; box-shadow: 0 8px 24px rgb(25 55 61 / 18%); }
+        #sigana-map .leaflet-popup-content { margin: 12px 14px; color: #19373d; font-size: 12px; line-height: 1.45; }
+        #sigana-map .leaflet-popup-content strong { display: block; margin-bottom: 4px; }
+        #sigana-map .leaflet-popup-content .map-popup-location { color: #788889; font-size: 11px; }
+        .map-legend-control {
+            position: absolute;
+            z-index: 500;
+            right: 12px;
+            bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 11px;
+            border: 1px solid rgb(220 229 227 / 90%);
+            border-radius: 10px;
+            background: rgb(255 255 255 / 94%);
+            box-shadow: 0 4px 14px rgb(25 55 61 / 12%);
+            color: #536466;
+            font-size: 10px;
+            pointer-events: none;
+        }
+        .map-legend-dot { width: 9px; height: 9px; border: 2px solid white; border-radius: 50%; background: #e64e3f; box-shadow: 0 0 0 1px #e64e3f; }
+        .map-legend-control strong { color: var(--teal); font-size: 11px; }
         .map-art {
             position: absolute;
             inset: 0;
@@ -568,7 +676,6 @@
             font-weight: bold;
             cursor: pointer;
         }
-
         .notification-list {
             max-height: min(330px, calc(100vh - 220px));
             overflow-y: auto;
@@ -687,9 +794,48 @@
             }
 
             .top-actions { width: 100%; }
-            .search { width: 100%; flex: 1; }
+            .search-wrap { flex: 1; min-width: 0; }
+            .search-wrap .search { width: 100%; }
+            .search-suggestions { left: 0; right: auto; width: min(390px, calc(100vw - 28px)); }
 
-            .stats {
+            .search-wrap { position: relative; z-index: 1105; }
+        
+        .user-menu-wrap { position: relative; z-index: 1103; }
+        .user-avatar { cursor: pointer; font: inherit; font-weight: bold; overflow: hidden; }
+        .user-avatar img, .profile-menu-avatar img { width: 100%; height: 100%; display: block; border-radius: 50%; object-fit: cover; }
+        .user-avatar:hover, .user-avatar[aria-expanded="true"] { background: #c9e1e4; }
+        .profile-menu {
+            position: absolute; z-index: 1104; top: calc(100% + 12px); right: 0;
+            width: min(300px, calc(100vw - 32px)); overflow: hidden;
+            border: 1px solid var(--line); border-radius: 14px; background: white;
+            box-shadow: 0 12px 35px rgb(20 45 50 / 16%);
+        }
+        .profile-menu[hidden] { display: none; }
+        .profile-menu-heading { display: flex; align-items: center; gap: 12px; padding: 17px; border-bottom: 1px solid var(--line); }
+        .profile-menu-avatar {
+            width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center;
+            border-radius: 50%; background: #dcebed; color: var(--teal); font-size: 17px; font-weight: bold;
+        }
+        .profile-menu-identity { min-width: 0; }
+        .profile-menu-identity strong, .profile-menu-identity span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-menu-identity strong { font-size: 13px; }
+        .profile-menu-identity span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+        .profile-menu-links { padding: 7px; }
+        .profile-menu-links a, .profile-menu-links button {
+            width: 100%; display: block; padding: 11px 10px; border: 0; border-radius: 8px;
+            background: transparent; color: var(--text); font: inherit; font-size: 12px;
+            text-align: left; text-decoration: none; cursor: pointer;
+        }
+        .profile-menu-links a:hover, .profile-menu-links button:hover { background: #f2f7f6; }
+        .profile-menu-links .profile-logout { color: #c84b37; }
+        .profile-menu-links .profile-login {
+            background: var(--teal);
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+        .profile-menu-links .profile-login:hover { background: var(--teal-dark); }
+        .stats {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 8px;
             }
@@ -698,16 +844,10 @@
             .stat-card strong { font-size: 17px; }
             .map-panel { min-height: 320px; }
         }
-
-                #sigana-map {
-            width: 100%;
-            height: 380px;
-        }
-
         @media (max-width: 680px) {
-            #sigana-map {
-                height: 320px;
-            }
+            #sigana-map { height: 320px; }
+            .map-panel { min-height: 360px; }
+            .map-legend-control { right: 8px; bottom: 28px; padding: 8px 9px; }
         }
         @media (min-width: 681px) {
     html,
@@ -762,6 +902,57 @@
         overflow: visible;
     }
 }
+    
+        /* Avatar foto pada dropdown profil: ukuran tetap dan crop lingkaran. */
+        .profile-menu-avatar {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
+            flex: 0 0 44px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+        }
+        .profile-menu-avatar img {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            max-width: none;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 50%;
+        }
+    
+        /* Foto avatar lingkaran di toolbar dashboard. */
+        .user-menu-wrap > .user-avatar {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            flex: 0 0 40px;
+            overflow: hidden;
+            padding: 0;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+        }
+        .user-menu-wrap > .user-avatar img {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            max-width: none;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 50%;
+        }
     </style>
 </head>
 
@@ -826,16 +1017,17 @@
             </div>
 
             <div class="top-actions">
-                <label class="search">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <circle cx="10.8" cy="10.8" r="6.5"
-                                stroke="currentColor" stroke-width="1.7"/>
-                        <path d="m16 16 4.2 4.2"
-                              stroke="currentColor" stroke-width="1.7"
-                              stroke-linecap="round"/>
-                    </svg>
-                    <input type="search" placeholder="Cari kejadian atau wilayah">
-                </label>
+                <div class="search-wrap">
+                    <label class="search" for="disasterSearch">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="10.8" cy="10.8" r="6.5" stroke="currentColor" stroke-width="1.7"/>
+                            <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                        <input id="disasterSearch" type="search" placeholder="Cari kejadian atau wilayah" autocomplete="off"
+                            role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchSuggestions">
+                    </label>
+                    <div class="search-suggestions" id="searchSuggestions" role="listbox" hidden></div>
+                </div>
 
                 <div class="notification-wrap">
             <button
@@ -870,14 +1062,14 @@
 
                 <div class="notification-list">
                     @forelse ($notifications as $notification)
-                        <a class="notification-item {{ $notification->is_read ? '' : 'unread' }}" href="{{ route('bencana.index') }}">
+                        <a class="notification-item {{ $notification->is_read ? '' : 'unread' }}" href="{{ isset($notification->id) && auth()->check() ? route('notifications.open', $notification->id) : (isset($notification->disaster_id) ? route('bencana.detail', $notification->disaster_id) : route('bencana.index')) }}">
                             <span class="notification-dot"></span>
                             <span class="notification-copy">
                                 <strong>{{ $notification->title }}</strong>
                                 <span>{{ $notification->message }}</span>
                                 <time>{{ $notification->created_at ? \Illuminate\Support\Carbon::parse($notification->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Baru saja' }}</time>
                             </span>
-                        </article>
+                        </a>
                     @empty
                         <p class="notification-empty">Belum ada notifikasi.</p>
                     @endforelse
@@ -888,8 +1080,42 @@
                 </a>
             </section>
         </div>
-                <div class="user-avatar" title="{{ auth()->user()->name ?? 'Pengguna' }}">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'P', 0, 1)) }}
+                <div class="user-menu-wrap">
+                    <button class="user-avatar" id="profileToggle" type="button" title="Buka menu profil"
+                        aria-label="Buka menu profil" aria-expanded="false" aria-controls="profileMenu">
+                        @if (auth()->check() && ($hasProfilePhoto ?? false))
+                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                        @else
+                            {{ strtoupper(substr(auth()->user()->name ?? 'P', 0, 1)) }}
+                        @endif
+                    </button>
+                    <section class="profile-menu" id="profileMenu" aria-label="Menu profil" hidden>
+                        <div class="profile-menu-heading">
+                                                        <div class="profile-menu-avatar" aria-hidden="true">
+                                @if (auth()->check() && ($hasProfilePhoto ?? false))
+                                    <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                                @else
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'T', 0, 1)) }}
+                                @endif
+                            </div>
+                            <div class="profile-menu-identity">
+                                <strong>{{ auth()->user()->name ?? 'Tamu' }}</strong>
+                                <span>{{ auth()->user()->email ?? 'Anda sedang menggunakan akses tamu' }}</span>
+                            </div>
+                        </div>
+                        <nav class="profile-menu-links" aria-label="Tautan akun">
+                            @auth
+                                <a href="{{ route('profil.index') }}">Lihat profil</a>
+                                <a href="{{ route('profil.edit') }}">Edit profil</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="profile-logout" type="submit">Keluar dari akun</button>
+                                </form>
+                            @else
+                                <a class="profile-login" href="{{ route('login') }}">Masuk ke akun</a>
+                            @endauth
+                        </nav>
+                    </section>
                 </div>
             </div>
         </header>
@@ -922,10 +1148,23 @@
 
                 <div class="updates">
                     @forelse ($disasters->take(5) as $disaster)
+                        @php
+                            $updateImageUrl = $disaster->photo
+                                ? (\Illuminate\Support\Str::startsWith($disaster->photo, ['http://', 'https://', '/']) ? $disaster->photo : asset('storage/' . $disaster->photo))
+                                : null;
+                        @endphp
                         <a class="update-item" href="{{ route('bencana.detail', $disaster->id) }}">
-                            <span class="tag">{{ $disaster->category }}</span>
-                            <h3>{{ $disaster->title }}</h3>
-                            <p>{{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB · {{ $disaster->location }}</p>
+                            <span class="update-thumb" aria-hidden="true">
+                                @if ($updateImageUrl)
+                                    <img src="{{ $updateImageUrl }}" alt="" loading="lazy">
+                                @else
+                                    📍
+                                @endif
+                            </span>
+                            <span class="update-copy">
+                                <span class="tag">{{ $disaster->category }}</span>
+                                <h3>{{ $disaster->title }}</h3>
+                                <p>Diunggah: {{ $disaster->created_at ? \Illuminate\Support\Carbon::parse($disaster->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Waktu unggah tidak tersedia' }} · {{ $disaster->location }}</p>                            </span>
                         </a>
                     @empty
                         <p class="updates-empty">Belum ada kejadian bencana di database.</p>
@@ -934,12 +1173,22 @@
             </article>
 
             <article class="panel map-panel" id="map">
-            <div class="panel-heading">
-                <h2>Peta kejadian bencana</h2>
-            </div>
-
-            <div id="sigana-map"></div>
-        </article>
+                <div class="panel-heading">
+                    <div class="map-heading-copy">
+                        <h2>Peta kejadian bencana</h2>
+                        <p>Lokasi laporan bencana yang memiliki koordinat</p>
+                    </div>
+                    <span class="map-region">Indonesia</span>
+                </div>
+                <div class="map-stage">
+                    <div id="sigana-map"></div>
+                    <div class="map-legend-control" aria-label="Lokasi kejadian bencana">
+                        <i class="map-legend-dot"></i>
+                        <span>Lokasi kejadian</span>
+                        <strong>{{ $mapDisasters->count() }}</strong>
+                    </div>
+                </div>
+            </article>
         </section>
     </main>
 </div>
@@ -968,12 +1217,142 @@
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') closeNotifications();
     });
+
+    const profileToggle = document.getElementById('profileToggle');
+    const profileMenu = document.getElementById('profileMenu');
+
+    function closeProfileMenu() {
+        profileMenu.hidden = true;
+        profileToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    profileToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const open = profileMenu.hidden;
+        profileMenu.hidden = !open;
+        profileToggle.setAttribute('aria-expanded', String(open));
+    });
+
+    profileMenu.addEventListener('click', function (event) { event.stopPropagation(); });
+    document.addEventListener('click', closeProfileMenu);
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeProfileMenu();
+    });
+
+    const disasterSearch = document.getElementById('disasterSearch');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const searchRecords = @json($disasters->map(fn ($disaster) => (array) $disaster)->values());
+
+    function renderSearchSuggestions() {
+        const query = disasterSearch.value.trim().toLocaleLowerCase('id');
+        searchSuggestions.replaceChildren();
+        if (!query) {
+            searchSuggestions.hidden = true;
+            disasterSearch.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        const matches = searchRecords.filter(function (item) {
+            return [item.title, item.category, item.location]
+                .some(value => String(value || '').toLocaleLowerCase('id').includes(query));
+        }).slice(0, 6);
+        if (matches.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'search-empty';
+            empty.textContent = 'Tidak ada kejadian atau wilayah yang cocok.';
+            searchSuggestions.append(empty);
+        } else {
+            matches.forEach(function (item) {
+                const link = document.createElement('a');
+                link.className = 'search-suggestion';
+                link.setAttribute('role', 'option');
+                link.href = @json(url('/bencana')) + '/' + encodeURIComponent(item.id);
+                const thumb = document.createElement('span');
+                thumb.className = 'search-suggestion-thumb';
+                thumb.setAttribute('aria-hidden', 'true');
+                if (item.photo) {
+                    const imagePath = String(item.photo);
+                    const imageUrl = (imagePath.toLowerCase().startsWith('http://') || imagePath.toLowerCase().startsWith('https://') || imagePath.startsWith('/'))
+                        ? imagePath
+                        : @json(asset('storage')) + '/' + imagePath.split('/').map(encodeURIComponent).join('/');
+                    const image = document.createElement('img');
+                    image.src = imageUrl;
+                    image.alt = '';
+                    image.loading = 'lazy';
+                    image.onerror = function () { thumb.textContent = '📍'; };
+                    thumb.append(image);
+                } else {
+                    thumb.textContent = '📍';
+                }
+                const copy = document.createElement('span');
+                copy.className = 'search-suggestion-copy';
+                const title = document.createElement('strong');
+                title.textContent = item.title;
+                const meta = document.createElement('span');
+                meta.className = 'search-suggestion-meta';
+                meta.textContent = [item.category, item.location].filter(Boolean).join(' · ');
+                const dates = document.createElement('span');
+                dates.className = 'search-suggestion-dates';
+                const uploadedAt = document.createElement('span');
+                const eventTime = document.createElement('span');
+                let occurredAt = 'Waktu kejadian belum tersedia';
+                let newsAt = 'Waktu unggah belum tersedia';
+                if (item.occurred_at) {
+                    const rawDate = String(item.occurred_at);
+                    const dateValue = /[zZ]|[+-]\d{2}:\d{2}$/.test(rawDate)
+                        ? rawDate
+                        : rawDate.replace(' ', 'T') + 'Z';
+                    const date = new Date(dateValue);
+                    if (!Number.isNaN(date.getTime())) {
+                        occurredAt = new Intl.DateTimeFormat('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
+                        }).format(date) + ' WIB';
+                    }
+                }
+                if (item.created_at) {
+                    const created = new Date(String(item.created_at).replace(' ', 'T') + 'Z');
+                    if (!Number.isNaN(created.getTime())) newsAt = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).format(created) + ' WIB';
+                }
+                uploadedAt.textContent = 'Diunggah · ' + newsAt;
+                eventTime.textContent = 'Kejadian · ' + occurredAt;
+                dates.append(uploadedAt, eventTime);
+                copy.append(title, meta, dates);
+                link.append(thumb, copy);
+                searchSuggestions.append(link);
+            });
+        }
+        searchSuggestions.hidden = false;
+        disasterSearch.setAttribute('aria-expanded', 'true');
+    }
+
+    disasterSearch.addEventListener('input', renderSearchSuggestions);
+    disasterSearch.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            searchSuggestions.hidden = true;
+            disasterSearch.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        if (event.key === 'Enter') {
+            const firstSuggestion = searchSuggestions.querySelector('a');
+            if (firstSuggestion && !searchSuggestions.hidden) {
+                event.preventDefault();
+                window.location.href = firstSuggestion.href;
+            }
+        }
+    });
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.search-wrap')) {
+            searchSuggestions.hidden = true;
+            disasterSearch.setAttribute('aria-expanded', 'false');
+        }
+    });
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    const map = L.map('sigana-map').setView([-2.5, 118], 4);
+    const map = L.map('sigana-map', { zoomControl: false }).setView([-2.5, 118], 4);
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -981,21 +1360,35 @@
     }).addTo(map);
 
     const disasterPoints = @json($mapDisasters);
+    const disasterMarkers = [];
 
     function makeDisasterPopup(disaster) {
         const content = document.createElement('div');
         const title = document.createElement('strong');
         title.textContent = disaster.title;
         const location = document.createElement('div');
+        location.className = 'map-popup-location';
         location.textContent = disaster.location;
         content.append(title, location);
         return content;
     }
+
     disasterPoints.forEach(function (disaster) {
-        L.marker([disaster.latitude, disaster.longitude])
-            .addTo(map)
-            .bindPopup(makeDisasterPopup(disaster));
+        const marker = L.circleMarker([disaster.latitude, disaster.longitude], {
+            radius: 8,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: '#e64e3f',
+            fillOpacity: 0.95
+        }).addTo(map).bindPopup(makeDisasterPopup(disaster), { maxWidth: 260 });
+        disasterMarkers.push(marker);
     });
+
+    if (disasterMarkers.length === 1) {
+        map.setView(disasterMarkers[0].getLatLng(), 6);
+    } else if (disasterMarkers.length > 1) {
+        map.fitBounds(L.featureGroup(disasterMarkers).getBounds().pad(0.18), { maxZoom: 7 });
+    }
 </script>
 </body>
 </html>

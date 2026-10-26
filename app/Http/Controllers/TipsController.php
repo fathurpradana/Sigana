@@ -15,7 +15,10 @@ class TipsController extends Controller
             ->orderBy('m.id')
             ->get();
 
-        $contacts = DB::table('emergency_contacts')->orderBy('name')->get();
+        $contacts = DB::table('emergency_contacts')
+        ->where('phone', '<>', '112')
+        ->orderBy('name')
+        ->get();
 
         return view('tips.index', compact('tips', 'contacts'));
     }

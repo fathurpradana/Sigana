@@ -161,6 +161,23 @@
             font-size: 24px;
         }
 
+        .success-message {
+            position: fixed;
+            z-index: 1200;
+            top: 20px;
+            right: 24px;
+            max-width: calc(100vw - 48px);
+            margin: 0;
+            padding: 12px 16px;
+            border: 1px solid #b9ded0;
+            border-radius: 10px;
+            background: #effaf4;
+            color: #236747;
+            box-shadow: 0 8px 24px rgb(20 45 50 / 12%);
+            font-size: 13px;
+            transition: opacity .25s ease, transform .25s ease;
+        }
+        .success-message.is-hidden { opacity: 0; transform: translateY(-8px); pointer-events: none; }
         .gear-link {
             width: 42px;
             height: 42px;
@@ -195,15 +212,31 @@
         }
 
         .avatar {
+            position: relative;
             width: 80px;
             height: 80px;
+            min-width: 80px;
+            min-height: 80px;
             display: grid;
             place-items: center;
-            margin: 0 auto 10px;
+            overflow: hidden;
+            margin: 0 auto 14px;
             border-radius: 50%;
             background: #e2eff0;
             color: var(--teal);
             font-size: 38px;
+        }
+
+        .avatar img {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            border-radius: inherit;
+            object-fit: cover;
+            object-position: center;
         }
 
         .profile-card h2 { margin: 0; font-size: 16px; }
@@ -283,7 +316,20 @@
         .setting-row:first-of-type { border-top: 0; }
 
         .setting-value,
-        .setting-arrow { color: var(--muted); }
+        .setting-arrow {
+            color: var(--muted);
+        }
+
+        .notification-preference-status {
+            margin: -2px 0 8px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .notification-preference-status:empty {
+            display: none;
+        }
 
         .toggle {
             width: 38px;
@@ -395,7 +441,7 @@
         <section class="page">
             <div class="heading">
                 <h1>Profil</h1>
-                @if (session('status'))<p class="success-message">{{ session('status') }}</p>@endif
+                @if (session('status'))<p class="success-message" id="profileSuccess" role="status">{{ session('status') }}</p>@endif
 
                 <a class="gear-link"
                    href="{{ route('profil.edit') }}"
@@ -413,7 +459,13 @@
 
             <div class="profile-layout">
                 <section class="profile-card">
-                    <div class="avatar" aria-hidden="true">♙</div>
+                    <div class="avatar" aria-hidden="true">
+                        @if ($hasProfilePhoto ?? false)
+                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                        @else
+                            ♙
+                        @endif
+                    </div>
                     <h2>{{ auth()->user()?->name ?? '[Nama pengguna]' }}</h2>
                     <p class="email">
                         {{ auth()->user()?->email ?? '[email@contoh.id]' }}
@@ -452,7 +504,7 @@
                             </div>
                             <div class="info-item">
                                 <span>Kota / kabupaten</span>
-                                <div class="info-value">Belum ditambahkan</div>
+                                <div class="info-value">{{ auth()->user()?->city ?: 'Belum ditambahkan' }}</div>
                             </div>
                         </div>
                     </section>
@@ -460,10 +512,36 @@
                     <section class="panel">
                         <h2>Pengaturan</h2>
 
-                        <label class="setting-row">
-                            <span>♧ &nbsp; Notifikasi peringatan</span>
-                            <input class="toggle" type="checkbox" checked>
-                        </label>
+                        <div class="setting-row">
+    <span>♧ &nbsp; Notifikasi peringatan</span>
+
+    @auth
+        <form id="notificationPreferenceForm"
+              method="POST"
+              action="{{ route('profil.notifications') }}">
+            @csrf
+            <input type="hidden" name="notifications_enabled" value="0">
+            <input
+                class="toggle"
+                id="notificationPreferenceToggle"
+                type="checkbox"
+                name="notifications_enabled"
+                value="1"
+                aria-label="Aktifkan notifikasi peringatan"
+                @checked((bool) (auth()->user()?->notifications_enabled ?? true))
+            >
+        </form>
+    @else
+        <a class="setting-value" href="{{ route('login') }}">
+            Masuk untuk mengatur
+        </a>
+    @endauth
+</div>
+
+                <p id="notificationPreferenceStatus"
+                class="notification-preference-status"
+                role="status"
+                aria-live="polite"></p>
 
                         <div class="setting-row">
                             <span>◎ &nbsp; Bahasa</span>
@@ -485,5 +563,64 @@
         </section>
     </main>
 </div>
+<script>
+    const profileSuccess = document.getElementById('profileSuccess');
+    if (profileSuccess) {
+        window.setTimeout(function () {
+            profileSuccess.classList.add('is-hidden');
+            window.setTimeout(function () { profileSuccess.remove(); }, 300);
+        }, 3000);
+    }
+
+    const preferenceForm = document.getElementById('notificationPreferenceForm');
+const preferenceToggle = document.getElementById('notificationPreferenceToggle');
+const preferenceStatus = document.getElementById('notificationPreferenceStatus');
+let preferenceStatusTimer;
+
+preferenceToggle?.addEventListener('change', async function () {
+    const previousValue = !this.checked;
+    this.disabled = true;
+    window.clearTimeout(preferenceStatusTimer);
+    preferenceStatus.textContent = 'Menyimpan pengaturan...';
+
+    try {
+        const formData = new FormData(preferenceForm);
+
+        // Kirim satu nilai yang sesuai posisi sakelar.
+        formData.set('notifications_enabled', this.checked ? '1' : '0');
+
+        const response = await fetch(preferenceForm.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': preferenceForm.querySelector(
+                    'input[name="_token"]'
+                ).value
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Pengaturan gagal disimpan.');
+        }
+
+        const result = await response.json();
+        preferenceStatus.textContent = result.message;
+
+        preferenceStatusTimer = window.setTimeout(() => {
+            preferenceStatus.textContent = '';
+        }, 2500);
+    } catch (error) {
+        this.checked = previousValue;
+        preferenceStatus.textContent = 'Pengaturan gagal disimpan. Coba lagi.';
+
+        preferenceStatusTimer = window.setTimeout(() => {
+            preferenceStatus.textContent = '';
+        }, 3500);
+    } finally {
+        this.disabled = false;
+    }
+});
+</script>
 </body>
 </html>

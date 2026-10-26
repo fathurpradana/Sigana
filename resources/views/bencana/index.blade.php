@@ -246,11 +246,14 @@
         .card-meta {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 8px;
             color: var(--muted);
             font-size: 10px;
         }
+
+        .card-meta .news-time { flex-basis: 100%; margin-left: 2px; }
 
         .tag {
             padding: 4px 8px;
@@ -528,7 +531,8 @@
                     <div class="card-body">
                         <div class="card-meta">
                             <span class="tag">{{ $disaster->category }}</span>
-                            <time>{{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB</time>
+                            <time class="event-time">Kejadian: {{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB</time>
+                            <time class="news-time">Diunggah: {{ $disaster->created_at ? \Illuminate\Support\Carbon::parse($disaster->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Waktu berita tidak tersedia' }}</time>
                         </div>
                         <h2>{{ $disaster->title }}</h2>
                         <p>{{ \Illuminate\Support\Str::limit($disaster->description ?: $disaster->location, 150) }}</p>

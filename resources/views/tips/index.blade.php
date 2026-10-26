@@ -116,15 +116,16 @@
 
         .content {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 300px;
+            grid-template-columns: minmax(0, 1.6fr) minmax(280px, .8fr);
             align-items: start;
-            gap: 16px;
+            gap: 20px;
         }
 
         .tips-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
+            align-content: start;
+            gap: 14px;
         }
 
 .sidebar-bottom {
@@ -134,10 +135,11 @@
         .tips-empty, .contacts-empty { padding: 22px; color: var(--muted); text-align: center; }
 
         .tip-card {
-            min-height: 112px;
+            min-height: 126px;
             display: flex;
-            gap: 12px;
-            padding: 15px;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 17px;
             border: 1px solid var(--line);
             border-radius: 13px;
             background: white;
@@ -156,11 +158,21 @@
             font-weight: bold;
         }
 
-        .tip-card:nth-child(6) .tip-number { background: var(--orange); }
+        .tip-card:nth-child(6) .tip-number {
+            background: var(--teal);
+        }
+
+        .tip-card small {
+            display: inline-block;
+            margin: 0 0 6px;
+            color: var(--muted);
+            font-size: 10px;
+        }
 
         .tip-card h2 {
             margin: 1px 0 6px;
             font-size: 13px;
+            line-height: 1.4;
         }
 
         .tip-card p {
@@ -170,7 +182,28 @@
             line-height: 1.55;
         }
 
-        .contact-column { display: grid; gap: 10px; }
+        .contact-column {
+            display: grid;
+            align-content: start;
+            gap: 12px;
+        }
+
+        .contacts-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2px 0 8px;
+        }
+
+        .contacts-heading h2 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .contacts-heading span {
+            color: var(--muted);
+            font-size: 11px;
+        }
 
         .call-112 {
             min-height: 84px;
@@ -204,7 +237,8 @@
         }
 
         .contacts {
-            overflow: hidden;
+            max-height: 420px;
+            overflow-y: auto;
             border: 1px solid var(--line);
             border-radius: 14px;
             background: white;
@@ -236,10 +270,122 @@
             line-height: 1.5;
         }
 
+.tips-area {
+    min-width: 0;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.category-card {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: white;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    border-color: var(--teal);
+    transform: translateY(-2px);
+}
+
+.category-count,
+.category-card > span:not(.category-link) {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.category-card strong {
+    font-size: 16px;
+}
+
+.category-link {
+    margin-top: auto;
+    color: var(--teal);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.tip-detail > h2 {
+    margin: 16px 0 12px;
+    font-size: 20px;
+}
+
+.back-to-categories {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--teal);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.phase-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.phase-filter {
+    padding: 8px 13px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.phase-filter.active {
+    border-color: var(--teal);
+    background: var(--teal);
+    color: white;
+}
+
+.tip-card small {
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.tip-card[hidden] {
+    display: none;
+}
+
+@media (max-width: 680px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
         @media (max-width: 900px) {
-            .content { grid-template-columns: 1fr; }
-            .contact-column { grid-template-columns: 1fr 1fr; }
-            .call-112, .notice { grid-column: 1 / -1; }
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-column {
+                grid-template-columns: 1fr;
+            }
+
+            .call-112,
+            .notice {
+                grid-column: auto;
+            }
         }
 
         @media (max-width: 680px) {
@@ -354,24 +500,57 @@
         </header>
 
         <div class="content">
-            <section class="tips-grid" aria-label="Tips keselamatan">
-                @forelse ($tips as $index => $tip)
-                    <article class="tip-card">
-                        <span class="tip-number">{{ $index + 1 }}</span>
-                        <div>
-                            @if ($tip->category)
-                                <small>{{ $tip->category }} · {{ $tip->phase }}</small>
-                            @endif
-                            <h2>{{ $tip->title }}</h2>
-                            <p>{{ $tip->content }}</p>
-                        </div>
-                    </article>
-                @empty
-                    <div class="tips-empty">
-                        Belum ada tips keselamatan di database. Konten akan tampil setelah data mitigasi ditambahkan.
+            @php
+    $tipsByCategory = $tips->groupBy(fn ($tip) => $tip->category ?: 'Panduan umum');
+@endphp
+
+<div class="tips-area">
+    <div class="category-grid" id="tipsOverview">
+        @forelse ($tipsByCategory as $category => $categoryTips)
+            <button class="category-card" type="button" data-category="{{ $category }}">
+                <span class="category-count">{{ $categoryTips->count() }} panduan</span>
+                <strong>{{ $category }}</strong>
+                <span>Langkah keselamatan sebelum, saat, dan sesudah bencana.</span>
+                <span class="category-link">Lihat panduan <b>→</b></span>
+            </button>
+        @empty
+            <div class="tips-empty">
+                Belum ada tips keselamatan di database.
+            </div>
+        @endforelse
+    </div>
+
+    <section class="tip-detail" id="tipDetail" hidden>
+        <button class="back-to-categories" id="backToCategories" type="button">
+            ← Kembali ke jenis bencana
+        </button>
+
+        <h2 id="selectedCategory"></h2>
+
+        <div class="phase-filters" aria-label="Pilih tahap panduan">
+            <button class="phase-filter active" type="button" data-phase="semua">Semua</button>
+            <button class="phase-filter" type="button" data-phase="sebelum">Sebelum</button>
+            <button class="phase-filter" type="button" data-phase="saat">Saat</button>
+            <button class="phase-filter" type="button" data-phase="sesudah">Sesudah</button>
+        </div>
+
+        <div class="tips-grid" id="tipCards">
+            @foreach ($tips as $tip)
+                @php $tipCategory = $tip->category ?: 'Panduan umum'; @endphp
+
+                <article class="tip-card"
+                         data-category="{{ $tipCategory }}"
+                         data-phase="{{ Illuminate\Support\Str::lower($tip->phase) }}">
+                    <div>
+                        <small>{{ $tip->phase }}</small>
+                        <h2>{{ $tip->title }}</h2>
+                        <p>{{ $tip->content }}</p>
                     </div>
-                @endforelse
-            </section>
+                </article>
+            @endforeach
+        </div>
+    </section>
+</div>
 
             <aside class="contact-column" aria-label="Kontak darurat">
                 <a class="call-112" href="tel:112">
@@ -393,7 +572,13 @@
             </span>
                 </a>
 
-                <div class="contacts">
+                <div>
+                    <div class="contacts-heading">
+                        <h2>Kontak darurat lainnya</h2>
+                        <span>{{ $contacts->count() }} kontak</span>
+                    </div>
+
+                    <div class="contacts">
                     @forelse ($contacts as $contact)
                         @php $telephone = preg_replace('/[^0-9+]/', '', $contact->phone); @endphp
                         <a class="contact" href="tel:{{ $telephone }}">
@@ -407,6 +592,7 @@
                         <p class="contacts-empty">Belum ada kontak darurat tambahan di database.</p>
                     @endforelse
                 </div>
+                </div>
 
                 <p class="notice">
                     Ketersediaan layanan dapat berbeda menurut wilayah. Jika nomor 112
@@ -416,5 +602,59 @@
         </div>
     </main>
 </div>
+
+<script>
+    const overview = document.getElementById('tipsOverview');
+    const detail = document.getElementById('tipDetail');
+    const categoryTitle = document.getElementById('selectedCategory');
+    const tipCards = [...document.querySelectorAll('.tip-card')];
+    let selectedCategory = '';
+    let selectedPhase = 'semua';
+
+    function filterTips() {
+        tipCards.forEach((card) => {
+            const categoryMatches = card.dataset.category === selectedCategory;
+            const phaseMatches =
+                selectedPhase === 'semua' || card.dataset.phase === selectedPhase;
+
+            card.hidden = !(categoryMatches && phaseMatches);
+        });
+    }
+
+    overview?.addEventListener('click', (event) => {
+        const button = event.target.closest('.category-card');
+        if (!button) return;
+
+        selectedCategory = button.dataset.category;
+        selectedPhase = 'semua';
+        categoryTitle.textContent = selectedCategory;
+        overview.hidden = true;
+        detail.hidden = false;
+
+        document.querySelectorAll('.phase-filter').forEach((filter) => {
+            filter.classList.toggle(filter.dataset.phase === 'semua' ? 'active' : 'inactive',
+                filter.dataset.phase === 'semua');
+        });
+
+        filterTips();
+    });
+
+    document.getElementById('backToCategories')?.addEventListener('click', () => {
+        detail.hidden = true;
+        overview.hidden = false;
+    });
+
+    document.querySelectorAll('.phase-filter').forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedPhase = button.dataset.phase;
+
+            document.querySelectorAll('.phase-filter').forEach((filter) => {
+                filter.classList.toggle('active', filter === button);
+            });
+
+            filterTips();
+        });
+    });
+</script>
 </body>
 </html>

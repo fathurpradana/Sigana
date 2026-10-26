@@ -33,9 +33,13 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/profil/edit', fn () => view('profil-edit'))->name('profil.edit');
+    Route::get('/profil/edit', [ProfileController::class, 'edit'])->name('profil.edit');
+    Route::get('/profil/foto', [ProfileController::class, 'photo'])->name('profil.photo');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::post('/notifikasi/dibaca', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::get('/notifikasi/{id}/buka', [NotificationController::class, 'open'])->whereNumber('id')->name('notifications.open');
+    Route::post('/profil/notifikasi', [ProfileController::class, 'updateNotificationPreference'])
+    ->name('profil.notifications');
 });
 
 Route::get('/beranda', [DashboardController::class, 'index'])->name('guest.home');
@@ -46,10 +50,22 @@ Route::get('/bencana/{id}', [DisasterController::class, 'show'])->whereNumber('i
 Route::get('/tips', [TipsController::class, 'index'])->name('tips.index');
 
 Route::get('/bantuan', function () {
-    return view('bantuan.index', ['categories' => DB::table('disaster_categories')->orderBy('name')->get()]);
+    return view('bantuan.index', [
+        'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
+        'page' => 'help',
+    ]);
 })->name('bantuan.index');
-Route::post('/bantuan/laporan', [DisasterReportController::class, 'store'])->name('bantuan.report');
 
-Route::view('/profil', 'profil')->name('profil.index');
+Route::get('/bantuan/lapor', function () {
+    return view('bantuan.index', [
+        'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
+        'page' => 'report',
+    ]);
+})->name('bantuan.report.form');
+
+Route::post('/bantuan/laporan', [DisasterReportController::class, 'store'])
+    ->name('bantuan.report');
+
+Route::get('/profil', [ProfileController::class, 'show'])->name('profil.index');
 
 Route::view('/tentang', 'tentang')->name('tentang.index');

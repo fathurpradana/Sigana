@@ -107,6 +107,26 @@
             font-size: clamp(22px, 2.5vw, 30px);
         }
 
+.report-page-body .chat-card {
+    display: none;
+}
+
+.report-page-body .help-layout {
+    grid-template-columns: minmax(0, 760px);
+}
+
+.report-card > a:first-child {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: var(--teal);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+a.report-submit {
+    padding: 0 12px;
+}
+
         .help-layout {
             display: grid;
             grid-template-columns: minmax(0, 1fr) 300px;
@@ -294,7 +314,13 @@
             min-height: 92px;
             resize: vertical;
         }
-
+        .photo-preview-wrap { display: none; margin-top: 10px; }
+        .photo-preview-wrap.visible { display: block; }
+        .photo-preview { width: 100%; aspect-ratio: 16 / 5; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #e8eeee; }
+        .photo-preview img { width: 100%; height: 100%; display: block; object-fit: cover; }
+        .photo-adjustment { display: grid; gap: 8px; margin-top: 10px; color: var(--muted); font-size: 10px; }
+        .photo-adjustment label { display: grid; gap: 4px; }
+        .photo-adjustment input[type="range"] { width: 100%; accent-color: var(--teal); }
         .report-submit,
         .emergency-button {
             width: 100%;
@@ -389,7 +415,7 @@
     </style>
 </head>
 
-<body>
+<body class="{{ ($page ?? 'help') === 'report' ? 'report-page-body' : '' }}">
 <div class="app">
     <aside class="sidebar">
         <div class="brand">
@@ -433,7 +459,7 @@
     </aside>
 
     <main class="main">
-        <h1>Layanan pelanggan</h1>
+        <h1>{{ ($page ?? 'help') === 'report' ? 'Lapor bencana' : 'Layanan pelanggan' }}</h1>
 
         <div class="help-layout">
             <section class="chat-card" aria-label="Chat bantuan SIGANA">
@@ -460,48 +486,145 @@
                 </form>
             </section>
 
-            <aside class="report-card">
-                <h2>Lapor bencana</h2>
-                <p class="report-intro">
-                    Bantu petugas dengan informasi yang jelas dan akurat.
-                </p>
+            @if (($page ?? 'help') === 'report')
 
-                <form id="reportForm" method="POST" action="{{ route('bantuan.report') }}">
-                    @csrf
-                    @if (session('report_status'))<p class="form-note visible">{{ session('report_status') }}</p>@endif
-                    @if ($errors->any())<p class="form-note visible">{{ $errors->first() }}</p>@endif
-                    <span class="report-label">Jenis kejadian</span>
+    <aside class="report-card">
+        <a href="{{ route('bantuan.index') }}">← Kembali ke Bantuan</a>
 
-                    <div class="category-options">
-                        @forelse ($categories as $index => $category)
-                            <button class="category-button {{ $index === 0 ? 'selected' : '' }}"
-                                    data-category-id="{{ $category->id }}" type="button">{{ $category->name }}</button>
-                        @empty
-                            <p>Kategori bencana belum tersedia.</p>
-                        @endforelse
-                    </div>
+        <h2>Lapor bencana</h2>
+        <p class="report-intro">
+            Bantu petugas dengan informasi yang jelas dan akurat.
+        </p>
 
-                    <input type="hidden" name="category_id" id="reportCategory" value="{{ $categories->first()->id ?? '' }}">
+        <form id="reportForm"
+      method="POST"
+      action="{{ route('bantuan.report') }}"
+      enctype="multipart/form-data">
+            @csrf
 
-                    <label class="report-label" for="reportLocation">Lokasi kejadian</label>
-                    <input id="reportLocation" name="location" type="text" value="{{ old('location') }}"
-                           placeholder="Desa, kecamatan, kota" required>
+            @if (session('report_status'))
+                <p class="form-note visible">{{ session('report_status') }}</p>
+            @endif
 
-                    <label class="report-label" for="reportDescription">Keterangan</label>
-                    <textarea id="reportDescription" name="description"
-                              placeholder="Ceritakan apa yang terjadi" required>{{ old('description') }}</textarea>
+            @if ($errors->any())
+                <p class="form-note visible">{{ $errors->first() }}</p>
+            @endif
 
-                    <button class="report-submit" type="submit">Kirim laporan</button>
+            <span class="report-label">Jenis kejadian</span>
 
-                    <p class="form-note" id="reportNote">
-                        Laporan akan disimpan dengan status Dilaporkan dan dapat dipantau pada menu Bencana.
-                    </p>
-                </form>
+            <div class="category-options">
+                @forelse ($categories as $index => $category)
+                    <button
+                        class="category-button {{ $index === 0 ? 'selected' : '' }}"
+                        data-category-id="{{ $category->id }}"
+                        type="button">
+                        {{ $category->name }}
+                    </button>
+                @empty
+                    <p>Kategori bencana belum tersedia.</p>
+                @endforelse
+            </div>
 
-                <a class="emergency-button" href="tel:112">
-                    Hubungi nomor darurat · 112
-                </a>
-            </aside>
+            <input
+                type="hidden"
+                name="category_id"
+                id="reportCategory"
+                value="{{ $categories->first()->id ?? '' }}">
+
+            <label class="report-label" for="reportTitle">Judul laporan</label>
+            <input
+                id="reportTitle"
+                name="title"
+                type="text"
+                value="{{ old('title') }}"
+                placeholder="Contoh: Banjir menggenangi jalan utama"
+                maxlength="255"
+                required>
+
+            <label class="report-label" for="reportLocation">Lokasi kejadian</label>
+            <input
+                id="reportLocation"
+                name="location"
+                type="text"
+                value="{{ old('location') }}"
+                placeholder="Desa, kecamatan, kota"
+                required>
+
+<label class="report-label" for="reportOccurredAt">
+    Tanggal dan waktu kejadian
+</label>
+<input
+    id="reportOccurredAt"
+    name="occurred_at"
+    type="datetime-local"
+    value="{{ old('occurred_at') }}"
+    required>
+
+<label class="report-label" for="reportDescription">Keterangan</label>
+<textarea
+    id="reportDescription"
+    name="description"
+    placeholder="Ceritakan apa yang terjadi"
+    required>{{ old('description') }}</textarea>
+
+<label class="report-label" for="reportPhoto">
+    Foto kejadian <span>(wajib)</span>
+</label>
+<input
+    id="reportPhoto"
+    name="photo"
+    type="file"
+    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+    required>
+
+
+<div class="photo-preview-wrap" id="photoPreviewWrap">
+    <span class="report-label">Sesuaikan posisi foto</span>
+    <div class="photo-preview"><img id="photoPreview" alt="Pratinjau potongan foto kejadian"></div>
+    <div class="photo-adjustment">
+        <label for="photoPositionX">Geser horizontal
+            <input id="photoPositionX" type="range" min="0" max="100" value="50">
+        </label>
+        <label for="photoPositionY">Geser vertikal
+            <input id="photoPositionY" type="range" min="0" max="100" value="50">
+        </label>
+    </div>
+</div>
+<p class="form-note visible">
+    Format JPG, PNG, atau WebP. Ukuran maksimal 4 MB.
+</p>
+
+<button class="report-submit" type="submit">Kirim laporan</button>
+
+<p class="form-note" id="reportNote">
+    Laporan akan disimpan dengan status Dilaporkan dan dapat dipantau pada menu Bencana.
+</p>
+        </form>
+
+        <a class="emergency-button" href="tel:112">
+            Hubungi nomor darurat · 112
+        </a>
+    </aside>
+
+@else
+
+    <aside class="report-card">
+        <h2>Lapor bencana</h2>
+        <p class="report-intro">
+            Bantu petugas dengan informasi yang jelas dan akurat.
+        </p>
+
+        <a class="report-submit"
+           href="{{ route('bantuan.report.form') }}">
+            Buka formulir laporan
+        </a>
+
+        <a class="emergency-button" href="tel:112">
+            Hubungi nomor darurat · 112
+        </a>
+    </aside>
+
+@endif
         </div>
     </main>
 </div>
@@ -558,6 +681,68 @@
     });
 
 
+    const reportForm = document.getElementById('reportForm');
+    const photoInput = document.getElementById('reportPhoto');
+    const photoPreviewWrap = document.getElementById('photoPreviewWrap');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoPositionX = document.getElementById('photoPositionX');
+    const photoPositionY = document.getElementById('photoPositionY');
+    let selectedPhoto = null;
+
+    if (photoInput && reportForm) {
+        photoInput.addEventListener('change', function () {
+            selectedPhoto = photoInput.files[0] || null;
+            photoInput.dataset.cropped = 'false';
+            if (!selectedPhoto) {
+                photoPreviewWrap.classList.remove('visible');
+                photoPreview.removeAttribute('src');
+                return;
+            }
+            photoPreview.src = URL.createObjectURL(selectedPhoto);
+            photoPositionX.value = 50;
+            photoPositionY.value = 50;
+            photoPreview.style.objectPosition = '50% 50%';
+            photoPreviewWrap.classList.add('visible');
+        });
+
+        function updatePhotoPosition() {
+            photoPreview.style.objectPosition = photoPositionX.value + '% ' + photoPositionY.value + '%';
+        }
+        photoPositionX.addEventListener('input', updatePhotoPosition);
+        photoPositionY.addEventListener('input', updatePhotoPosition);
+
+        reportForm.addEventListener('submit', function (event) {
+            if (!selectedPhoto || photoInput.dataset.cropped === 'true') return;
+            event.preventDefault();
+            const image = new Image();
+            image.onload = function () {
+                const frame = photoPreview.getBoundingClientRect();
+                const ratio = frame.width / frame.height;
+                let cropWidth = image.width;
+                let cropHeight = image.height;
+                if (image.width / image.height > ratio) cropWidth = image.height * ratio;
+                else cropHeight = image.width / ratio;
+
+                const cropX = (image.width - cropWidth) * (Number(photoPositionX.value) / 100);
+                const cropY = (image.height - cropHeight) * (Number(photoPositionY.value) / 100);
+                const canvas = document.createElement('canvas');
+                canvas.width = 1600;
+                canvas.height = Math.round(canvas.width / ratio);
+                canvas.getContext('2d').drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(function (blob) {
+                    if (!blob) { reportForm.submit(); return; }
+                    const file = new File([blob], 'foto-kejadian.jpg', { type: 'image/jpeg' });
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+                    photoInput.files = transfer.files;
+                    photoInput.dataset.cropped = 'true';
+                    reportForm.requestSubmit();
+                }, 'image/jpeg', 0.9);
+            };
+            image.onerror = function () { reportForm.submit(); };
+            image.src = URL.createObjectURL(selectedPhoto);
+        });
+    }
 </script>
 </body>
 </html>

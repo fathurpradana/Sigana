@@ -13,7 +13,7 @@ class DisasterController extends Controller
 
         $disasters = DB::table('disasters as d')
             ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
-            ->select('d.id', 'd.title', 'd.location', 'd.occurred_at', 'd.status', 'd.description', 'd.photo', 'c.name as category')
+            ->select('d.id', 'd.title', 'd.location', 'd.occurred_at', 'd.created_at', 'd.status', 'd.description', 'd.photo', 'c.name as category')
             ->when($request->filled('q'), function ($query) use ($request) {
                 $term = '%' . trim($request->input('q')) . '%';
                 $query->where(function ($subquery) use ($term) {
@@ -21,7 +21,7 @@ class DisasterController extends Controller
                 });
             })
             ->when($request->filled('category'), fn ($query) => $query->where('c.id', $request->integer('category')))
-            ->orderByDesc('d.occurred_at')
+            ->orderByRaw('COALESCE(d.created_at, d.occurred_at) DESC')
             ->get();
 
         return view('bencana.index', compact('categories', 'disasters'));

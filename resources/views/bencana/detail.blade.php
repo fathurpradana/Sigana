@@ -118,20 +118,20 @@
         }
 
         .hero {
-            height: clamp(190px, 28vw, 300px);
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            border-radius: 12px;
-            background:
-                radial-gradient(ellipse at 57% 73%, #ffbb48 0 5%, transparent 6%),
-                radial-gradient(ellipse at 53% 92%, #222b2d 0 27%, transparent 28%),
-                linear-gradient(180deg, #414b4d, #a8614f 65%, #273336);
-            color: white;
-            font-size: 70px;
-        }
+    height: clamp(190px, 28vw, 300px);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #263b40;
+}
 
-        .hero img { width: 100%; height: 100%; object-fit: cover; }
+.hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+}
         .detail-content { padding: 14px 22px 4px; }
 
         .status {
@@ -394,8 +394,8 @@
                 <h1>{{ $disaster->title }}</h1>
 
                 <p class="meta">
-                    {{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB
-                    · {{ $disaster->location }}
+                    Diunggah: {{ $disaster->created_at ? \Illuminate\Support\Carbon::parse($disaster->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Waktu berita tidak tersedia' }}<br>
+                    Waktu kejadian: {{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB · {{ $disaster->location }}
                 </p>
 
                 <p class="description">{{ $disaster->description ?: 'Belum ada keterangan untuk kejadian ini.' }}</p>
