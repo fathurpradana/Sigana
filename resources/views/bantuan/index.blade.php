@@ -413,6 +413,8 @@ a.report-submit {
             cursor: pointer;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body class="{{ ($page ?? 'help') === 'report' ? 'report-page-body' : '' }}">

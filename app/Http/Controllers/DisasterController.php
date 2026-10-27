@@ -13,6 +13,7 @@ class DisasterController extends Controller
 
         $disasters = DB::table('disasters as d')
             ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
+            ->where('d.verification_status', 'Disetujui')
             ->select('d.id', 'd.title', 'd.location', 'd.occurred_at', 'd.created_at', 'd.status', 'd.description', 'd.photo', 'c.name as category')
             ->when($request->filled('q'), function ($query) use ($request) {
                 $term = '%' . trim($request->input('q')) . '%';
@@ -32,6 +33,7 @@ class DisasterController extends Controller
         $disaster = DB::table('disasters as d')
             ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
             ->where('d.id', $id)
+            ->where('d.verification_status', 'Disetujui')
             ->select('d.*', 'c.name as category')
             ->first();
 

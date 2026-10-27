@@ -27,7 +27,11 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $fallback = Auth::user()->role === 'admin'
+            ? route('admin.dashboard')
+            : route('dashboard');
+
+        return redirect()->to($fallback);
     }
 
     public function register(Request $request)
@@ -42,6 +46,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => 'user',
         ]);
 
         return redirect()->route('login')

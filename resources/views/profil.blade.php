@@ -290,6 +290,9 @@
             font-weight: 600;
         }
 
+        .info-item-full { grid-column: 1 / -1; }
+        .info-item-full .info-value { min-height: 54px; padding-top: 9px; padding-bottom: 9px; white-space: pre-wrap; }
+
         .info-value {
             min-height: 38px;
             display: flex;
@@ -393,6 +396,8 @@
             .info-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body>
@@ -505,6 +510,18 @@
                             <div class="info-item">
                                 <span>Kota / kabupaten</span>
                                 <div class="info-value">{{ auth()->user()?->city ?: 'Belum ditambahkan' }}</div>
+                            </div>
+                            <div class="info-item">
+                                <span>Tanggal lahir</span>
+                                <div class="info-value">{{ auth()->user()?->birth_date?->format('d M Y') ?? 'Belum ditambahkan' }}</div>
+                            </div>
+                            <div class="info-item">
+                                <span>Jenis kelamin</span>
+                                <div class="info-value">{{ auth()->user()?->gender ? ucfirst(auth()->user()->gender) : 'Belum ditambahkan' }}</div>
+                            </div>
+                            <div class="info-item info-item-full">
+                                <span>Alamat lengkap</span>
+                                <div class="info-value">{{ auth()->user()?->address ?: 'Belum ditambahkan' }}</div>
                             </div>
                         </div>
                     </section>

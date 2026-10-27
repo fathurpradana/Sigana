@@ -440,6 +440,8 @@
             cursor: pointer;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body>
@@ -542,6 +544,9 @@
                          data-category="{{ $tipCategory }}"
                          data-phase="{{ Illuminate\Support\Str::lower($tip->phase) }}">
                     <div>
+                        @if ($tip->image)
+                            <img src="{{ \Illuminate\Support\Str::startsWith($tip->image, ['http://', 'https://', '/']) ? $tip->image : asset('storage/' . $tip->image) }}" alt="{{ $tip->title }}" style="display:block; width:100%; max-height:190px; margin-bottom:12px; border-radius:10px; object-fit:cover;">
+                        @endif
                         <small>{{ $tip->phase }}</small>
                         <h2>{{ $tip->title }}</h2>
                         <p>{{ $tip->content }}</p>

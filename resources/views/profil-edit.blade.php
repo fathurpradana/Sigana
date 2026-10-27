@@ -191,7 +191,9 @@
             font-weight: 600;
         }
 
-        .fields input {
+        .fields input,
+        .fields select,
+        .fields textarea {
             width: 100%;
             min-height: 42px;
             padding: 0 12px;
@@ -202,6 +204,9 @@
             font: inherit;
             font-size: 13px;
         }
+
+        .fields textarea { padding: 10px 12px; resize: vertical; }
+        .fields .field-full { grid-column: 1 / -1; }
 
         .photo-editor {
             display: flex; align-items: center; gap: 16px; margin: 0 0 20px;
@@ -318,6 +323,8 @@
             .fields { grid-template-columns: 1fr; }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body>
@@ -422,6 +429,25 @@
                     <label>
                         Kota / kabupaten
                         <input type="text" name="city" maxlength="120" value="{{ old('city', auth()->user()->city) }}" placeholder="Contoh: Padang">
+                    </label>
+
+                    <label>
+                        Tanggal lahir
+                        <input type="date" name="birth_date" value="{{ old('birth_date', auth()->user()->birth_date?->format('Y-m-d')) }}">
+                    </label>
+
+                    <label>
+                        Jenis kelamin
+                        <select name="gender">
+                            <option value="">Pilih jenis kelamin</option>
+                            <option value="perempuan" @selected(old('gender', auth()->user()->gender) === 'perempuan')>Perempuan</option>
+                            <option value="laki-laki" @selected(old('gender', auth()->user()->gender) === 'laki-laki')>Laki-laki</option>
+                        </select>
+                    </label>
+
+                    <label class="field-full">
+                        Alamat lengkap
+                        <textarea name="address" maxlength="1000" rows="3" placeholder="Nama jalan, kelurahan, kecamatan">{{ old('address', auth()->user()->address) }}</textarea>
                     </label>
                 </div>
 

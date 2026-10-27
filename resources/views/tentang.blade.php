@@ -307,6 +307,8 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body>
@@ -404,6 +406,21 @@
                 Untuk kondisi darurat, ikuti arahan petugas dan informasi dari
                 instansi resmi.
             </div>
+
+            @if (($information ?? collect())->isNotEmpty())
+                <section class="info-card">
+                    <h2>Informasi terbaru</h2>
+                    @foreach ($information as $item)
+                        <article style="padding: 14px 0; border-top: 1px solid #edf0ee;">
+                            <h3 style="margin: 0 0 8px;">{{ $item->title }}</h3>
+                            @if ($item->image)
+                                <img src="{{ \Illuminate\Support\Str::startsWith($item->image, ['http://', 'https://', '/']) ? $item->image : asset('storage/' . $item->image) }}" alt="{{ $item->title }}" style="display:block; width:min(100%, 560px); max-height:280px; margin:10px 0; border-radius:12px; object-fit:cover;">
+                            @endif
+                            <p style="white-space:pre-line;">{{ $item->content }}</p>
+                        </article>
+                    @endforeach
+                </section>
+            @endif
         </section>
     </main>
 </div>

@@ -413,6 +413,8 @@
         #sigana-map .leaflet-popup-content { margin: 12px 14px; color: #19373d; font-size: 12px; line-height: 1.45; }
         #sigana-map .leaflet-popup-content strong { display: block; margin-bottom: 4px; }
         #sigana-map .leaflet-popup-content .map-popup-location { color: #788889; font-size: 11px; }
+#sigana-map .sigana-disaster-marker { background: transparent; border: 0; }
+        #sigana-map .sigana-disaster-marker span { display: grid; width: 38px; height: 38px; place-items: center; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 3px 10px rgb(24 48 54 / 35%); color: #fff; font-size: 19px; line-height: 1; }
         .map-legend-control {
             position: absolute;
             z-index: 500;
@@ -682,23 +684,39 @@
         }
 
         .notification-item {
-            text-decoration: none;
             width: 100%;
             display: flex;
-            align-items: flex-start;
-            gap: 11px;
-            padding: 14px 16px;
-            border: 0;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
             border-bottom: 1px solid #edf0ed;
             background: white;
             color: var(--text);
-            text-align: left;
-            cursor: pointer;
         }
 
-        .notification-item:hover {
-            background: #f8faf8;
+        .notification-link {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: inherit;
+            text-decoration: none;
         }
+
+        .notification-link:hover { opacity: .82; }
+        .notification-mark-form { flex: 0 0 auto; margin: 0; }
+        .notification-mark-form button {
+            padding: 5px 7px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--teal);
+            font: inherit;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .notification-mark-form button:hover { background: #e7f1f0; }
 
         .notification-item.unread {
             background: #f2f8f8;
@@ -714,12 +732,14 @@
         }
 
         .notification-item:not(.unread) .notification-dot {
-            background: #d8dfdc;
+            display: none;
         }
 
         .notification-copy {
             display: grid;
-            gap: 5px;
+            flex: 1;
+            min-width: 0;
+            gap: 4px;
         }
 
         .notification-copy strong {
@@ -727,10 +747,14 @@
             line-height: 1.4;
         }
 
-        .notification-copy span {
+        .notification-copy .notification-summary {
+            display: -webkit-box;
+            overflow: hidden;
             color: #788889;
             font-size: 11px;
             line-height: 1.4;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
         }
 
         .notification-copy time {
@@ -954,6 +978,8 @@
             border-radius: 50%;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
+    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
 </head>
 
 <body>
@@ -1057,19 +1083,27 @@
             >
                 <header class="notification-header">
                     <h2>Notifikasi</h2>
-                    @auth<form method="POST" action="{{ route('notifications.read-all') }}">@csrf<button type="submit" id="markAllRead">Tandai dibaca</button></form>@endauth
+                    <form id="markAllReadForm" method="POST" action="{{ route('notifications.read-all') }}">@csrf<button type="submit" id="markAllRead">Tandai semua dibaca</button></form>
                 </header>
 
                 <div class="notification-list">
                     @forelse ($notifications as $notification)
-                        <a class="notification-item {{ $notification->is_read ? '' : 'unread' }}" href="{{ isset($notification->id) && auth()->check() ? route('notifications.open', $notification->id) : (isset($notification->disaster_id) ? route('bencana.detail', $notification->disaster_id) : route('bencana.index')) }}">
-                            <span class="notification-dot"></span>
-                            <span class="notification-copy">
-                                <strong>{{ $notification->title }}</strong>
-                                <span>{{ $notification->message }}</span>
-                                <time>{{ $notification->created_at ? \Illuminate\Support\Carbon::parse($notification->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Baru saja' }}</time>
-                            </span>
-                        </a>
+                        <article class="notification-item {{ $notification->is_read ? '' : 'unread' }}">
+                            <a class="notification-link" href="{{ isset($notification->id) ? route('notifications.open', $notification->id) : (isset($notification->disaster_id) ? route('bencana.detail', $notification->disaster_id) : route('bencana.index')) }}">
+                                <span class="notification-dot"></span>
+                                <span class="notification-copy">
+                                    <strong>{{ $notification->title }}</strong>
+                                    <span class="notification-summary">{{ \Illuminate\Support\Str::limit(trim($notification->message), 110) }}</span>
+                                    <time>{{ $notification->created_at ? \Illuminate\Support\Carbon::parse($notification->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Baru saja' }}</time>
+                                </span>
+                            </a>
+                            @if (isset($notification->id) && ! $notification->is_read)
+                                <form class="notification-mark-form" method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                                    @csrf
+                                    <button type="submit" aria-label="Tandai notifikasi sudah dibaca">Tandai dibaca</button>
+                                </form>
+                            @endif
+                        </article>
                     @empty
                         <p class="notification-empty">Belum ada notifikasi.</p>
                     @endforelse
@@ -1348,6 +1382,57 @@
     });
 </script>
 
+
+<script>
+    const notificationMenu = document.getElementById('notificationMenu');
+    const notificationBadge = document.getElementById('notificationCount');
+
+    function updateUnreadBadge(changeToZero = false) {
+        if (!notificationBadge) return;
+        const current = Number.parseInt(notificationBadge.textContent, 10) || 0;
+        const next = changeToZero ? 0 : Math.max(0, current - 1);
+        notificationBadge.textContent = String(next);
+        notificationBadge.hidden = next === 0;
+    }
+
+    notificationMenu?.addEventListener('submit', async function (event) {
+        const form = event.target.closest('.notification-mark-form, #markAllReadForm');
+        if (!form) return;
+        event.preventDefault();
+        const button = form.querySelector('button');
+        if (button) button.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                },
+                body: new FormData(form)
+            });
+            if (!response.ok) throw new Error('Tidak dapat menyimpan status baca.');
+
+            if (form.id === 'markAllReadForm') {
+                notificationMenu.querySelectorAll('.notification-item').forEach(function (item) {
+                    item.classList.remove('unread');
+                    item.querySelector('.notification-dot')?.remove();
+                    item.querySelector('.notification-mark-form')?.remove();
+                });
+                updateUnreadBadge(true);
+            } else {
+                const item = form.closest('.notification-item');
+                item?.classList.remove('unread');
+                item?.querySelector('.notification-dot')?.remove();
+                form.remove();
+                updateUnreadBadge();
+            }
+        } catch (error) {
+            form.submit();
+        }
+    });
+</script>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
@@ -1373,14 +1458,28 @@
         return content;
     }
 
+    function markerStyleForCategory(category) {
+        const name = String(category || '').toLocaleLowerCase('id');
+        if (name.includes('gunung') || name.includes('vulkan')) return { icon: '🌋', color: '#c84b37' };
+        if (name.includes('tsunami')) return { icon: '🌊', color: '#2867a8' };
+        if (name.includes('banjir')) return { icon: '💧', color: '#1685a0' };
+        if (name.includes('gempa')) return { icon: '🏚️', color: '#b87818' };
+        if (name.includes('longsor')) return { icon: '⛰️', color: '#795548' };
+        return { icon: '⚠️', color: '#105461' };
+    }
+
     disasterPoints.forEach(function (disaster) {
-        const marker = L.circleMarker([disaster.latitude, disaster.longitude], {
-            radius: 8,
-            color: '#ffffff',
-            weight: 2,
-            fillColor: '#e64e3f',
-            fillOpacity: 0.95
-        }).addTo(map).bindPopup(makeDisasterPopup(disaster), { maxWidth: 260 });
+        const markerStyle = markerStyleForCategory(disaster.category);
+        const disasterIcon = L.divIcon({
+            className: 'sigana-disaster-marker',
+            html: `<span style="background:${markerStyle.color}">${markerStyle.icon}</span>`,
+            iconSize: [38, 38],
+            iconAnchor: [19, 19],
+            popupAnchor: [0, -20]
+        });
+        const marker = L.marker([disaster.latitude, disaster.longitude], { icon: disasterIcon })
+            .addTo(map)
+            .bindPopup(makeDisasterPopup(disaster), { maxWidth: 260 });
         disasterMarkers.push(marker);
     });
 
