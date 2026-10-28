@@ -30,12 +30,57 @@ html[data-theme="dark"] body {
     color: var(--sigana-text) !important;
 }
 
+/* Preserve the branded split layout on login pages in dark mode. */
+html[data-theme="dark"] .auth-page,
+html[data-theme="dark"] .form-panel {
+    background-color: var(--sigana-page) !important;
+    color: var(--sigana-text) !important;
+}
+
+html[data-theme="dark"] .brand-panel {
+    background-color: #105361 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .auth-page .tabs {
+    background-color: #26383c !important;
+}
+
+html[data-theme="dark"] .auth-page .tab {
+    color: #d3e0e1 !important;
+}
+
+html[data-theme="dark"] .auth-page .tab.active {
+    background-color: #ffffff !important;
+    color: #105361 !important;
+}
+
+html[data-theme="dark"] .auth-page .text-link {
+    color: #83d5df !important;
+}
+
+html[data-theme="dark"] .auth-page .guest-button {
+    background-color: #223237 !important;
+    border-color: #466067 !important;
+    color: #e7f0f1 !important;
+}
+
+html[data-theme="dark"] .auth-page input:-webkit-autofill,
+html[data-theme="dark"] .auth-page input:-webkit-autofill:hover,
+html[data-theme="dark"] .auth-page input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #e7f0f1 !important;
+    box-shadow: 0 0 0 1000px #223237 inset !important;
+    caret-color: #e7f0f1;
+}
+html[data-theme="dark"] .brand-panel .brand-description {
+    color: #d4e4e6 !important;
+}
 html[data-theme="dark"] :is(main, .main, .content, .content-area, .page, .page-content, .app, .auth-page, .auth-shell) {
     background-color: var(--sigana-page);
     color: var(--sigana-text);
 }
 
-html[data-theme="dark"] :is(article, .card, [class*="-card"], [class*="-panel"], [class*="-box"], [class*="-menu"], .panel, .record, .notice, .stat, .stat-card, .update-item, .notification-item, .notification-link, .chat-message, .message-bubble, .tip-item, .emergency-contact, .contact-row, .profile-setting-row) {
+html[data-theme="dark"] :is(article, .card, [class*="-card"], [class*="-box"], [class*="-menu"], .panel, .record, .notice, .stat, .stat-card, .update-item, .notification-item, .notification-link, .chat-message, .message-bubble, .tip-item, .emergency-contact, .contact-row, .profile-setting-row) {
     background-color: var(--sigana-surface) !important;
     border-color: var(--sigana-line) !important;
     color: var(--sigana-text) !important;
@@ -211,4 +256,26 @@ html[data-theme="dark"] body button.button.secondary {
     background-color: #223237 !important;
     border-color: #466067 !important;
     color: #d9eeee !important;
+}
+/* Shared disaster detail page styles (authenticated, guest, and admin). */
+html[data-theme="dark"] .detail-card {
+    background-color: var(--sigana-surface) !important;
+    border-color: var(--sigana-line) !important;
+}
+
+html[data-theme="dark"] .detail-content .meta-item,
+html[data-theme="dark"] .detail-content .advice {
+    background-color: var(--sigana-surface-soft) !important;
+    border-color: var(--sigana-line) !important;
+    color: var(--sigana-text) !important;
+}
+
+html[data-theme="dark"] .detail-content .back-link {
+    color: #83d5df !important;
+}
+
+html[data-theme="dark"] .detail-content .emergency-button {
+    background-color: #382622 !important;
+    border-color: #a34f3c !important;
+    color: #ffad96 !important;
 }

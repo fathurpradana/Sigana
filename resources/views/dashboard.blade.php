@@ -414,7 +414,7 @@
         #sigana-map .leaflet-popup-content strong { display: block; margin-bottom: 4px; }
         #sigana-map .leaflet-popup-content .map-popup-location { color: #788889; font-size: 11px; }
 #sigana-map .sigana-disaster-marker { background: transparent; border: 0; }
-        #sigana-map .sigana-disaster-marker span { display: grid; width: 38px; height: 38px; place-items: center; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 3px 10px rgb(24 48 54 / 35%); color: #fff; font-size: 19px; line-height: 1; }
+        #sigana-map .sigana-disaster-marker span { display: grid; width: 28px; height: 28px; box-sizing: border-box; place-items: center; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 3px 10px rgb(24 48 54 / 35%); color: #fff; font-size: 14px; line-height: 1; }
         .map-legend-control {
             position: absolute;
             z-index: 500;
@@ -978,8 +978,8 @@
             border-radius: 50%;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
-    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 
 <body>
@@ -1436,7 +1436,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    const map = L.map('sigana-map', { zoomControl: false }).setView([-2.5, 118], 4);
+    const map = L.map('sigana-map', { zoomControl: false, markerZoomAnimation: false }).setView([-2.5, 118], 4);
     L.control.zoom({ position: 'topright' }).addTo(map);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1473,9 +1473,9 @@
         const disasterIcon = L.divIcon({
             className: 'sigana-disaster-marker',
             html: `<span style="background:${markerStyle.color}">${markerStyle.icon}</span>`,
-            iconSize: [38, 38],
-            iconAnchor: [19, 19],
-            popupAnchor: [0, -20]
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -16]
         });
         const marker = L.marker([disaster.latitude, disaster.longitude], { icon: disasterIcon })
             .addTo(map)

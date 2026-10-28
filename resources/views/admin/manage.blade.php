@@ -32,8 +32,8 @@
         @media(max-width:950px) { .shell { grid-template-columns:1fr; padding:16px; } aside { position:static; display:flex; gap:4px; overflow-x:auto; } aside a { flex:0 0 auto; white-space:nowrap; }.stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media(max-width:560px) { header { align-items:flex-start; }.header-actions { flex-direction:column; align-items:stretch; }.stats,.form-grid { grid-template-columns:1fr; }.field.full { grid-column:auto; }.panel { padding:14px; }.page-title { font-size:25px; } }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
-    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 <body>
 <header>

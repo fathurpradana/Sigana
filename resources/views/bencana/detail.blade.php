@@ -111,14 +111,14 @@
         .detail-card {
             width: min(100%, 1000px);
             margin: 0 auto;
-            padding: 18px;
+            padding: 20px;
             border: 1px solid var(--line);
             border-radius: 17px;
             background: white;
         }
 
         .hero {
-    height: clamp(190px, 28vw, 300px);
+    height: clamp(220px, 32vw, 340px);
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -130,9 +130,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center bottom;
+    object-position: center 42%;
 }
-        .detail-content { padding: 14px 22px 4px; }
+        .detail-content { max-width: 860px; margin: 0 auto; padding: 20px 12px 6px; }
 
         .status {
             display: inline-block;
@@ -147,21 +147,34 @@
         h1 {
             margin: 14px 0;
             color: #172d32;
-            font-size: clamp(21px, 3vw, 30px);
-            text-align: center;
+            font-size: clamp(22px, 2.5vw, 32px);
+            line-height: 1.25;
+            text-align: left;
         }
 
         .meta {
-            margin: 0 0 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 20px;
             color: var(--muted);
             font-size: 12px;
+        }
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #f7f8f6;
         }
 
         .description {
             margin: 0 0 28px;
             color: #526365;
-            font-size: 13px;
-            line-height: 1.7;
+            font-size: 14px;
+            line-height: 1.8;
         }
 
         .advice {
@@ -244,7 +257,9 @@
 
             .main { padding: 14px; }
             .detail-card { padding: 10px; }
-            .detail-content { padding: 12px 6px 4px; }
+            .hero { height: 220px; }
+            .detail-content { padding: 14px 4px 4px; }
+            h1 { font-size: 22px; }
         }
 
         @media (min-width: 681px) {
@@ -318,8 +333,8 @@
     cursor: pointer;
 }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
-    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 
 <body>
@@ -395,10 +410,11 @@
 
                 <h1>{{ $disaster->title }}</h1>
 
-                <p class="meta">
-                    Diunggah: {{ $disaster->created_at ? \Illuminate\Support\Carbon::parse($disaster->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Waktu berita tidak tersedia' }}<br>
-                    Waktu kejadian: {{ \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') }} WIB · {{ $disaster->location }}
-                </p>
+                <div class="meta">
+                    <span class="meta-item">Diunggah {{ $disaster->created_at ? \Illuminate\Support\Carbon::parse($disaster->created_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : '—' }}</span>
+                    <span class="meta-item">Kejadian {{ $disaster->occurred_at ? \Illuminate\Support\Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : 'Waktu tidak tersedia' }}</span>
+                    <span class="meta-item">{{ $disaster->location }}</span>
+                </div>
 
                 <p class="description">{{ $disaster->description ?: 'Belum ada keterangan untuk kejadian ini.' }}</p>
 

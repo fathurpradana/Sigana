@@ -91,15 +91,17 @@ Route::get('/bantuan', function () {
     ]);
 })->name('bantuan.index');
 
-Route::get('/bantuan/lapor', function () {
-    return view('bantuan.index', [
-        'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
-        'page' => 'report',
-    ]);
-})->name('bantuan.report.form');
+Route::middleware('auth')->group(function () {
+    Route::get('/bantuan/lapor', function () {
+        return view('bantuan.index', [
+            'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
+            'page' => 'report',
+        ]);
+    })->name('bantuan.report.form');
 
-Route::post('/bantuan/laporan', [DisasterReportController::class, 'store'])
-    ->name('bantuan.report');
+    Route::post('/bantuan/laporan', [DisasterReportController::class, 'store'])
+        ->name('bantuan.report');
+});
 
 Route::get('/profil', [ProfileController::class, 'show'])->name('profil.index');
 

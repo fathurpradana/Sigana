@@ -28,8 +28,8 @@
         @media (max-width: 700px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } header { padding: 16px; } main { padding: 30px 16px; } }
         @media (max-width: 420px) { .cards { grid-template-columns: 1fr; } }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
-    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 <body>
 <header>

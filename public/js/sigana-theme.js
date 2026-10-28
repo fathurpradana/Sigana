@@ -4,7 +4,7 @@
 
     let savedTheme = 'light';
     try {
-        savedTheme = localStorage.getItem(storageKey) || 'light';
+        savedTheme = sessionStorage.getItem(storageKey) || 'light';
     } catch (error) {
         savedTheme = 'light';
     }
@@ -33,7 +33,7 @@
         button.addEventListener('click', function () {
             const nextTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
             try {
-                localStorage.setItem(storageKey, nextTheme);
+                sessionStorage.setItem(storageKey, nextTheme);
             } catch (error) {
                 // The selected theme still applies for this page if storage is unavailable.
             }

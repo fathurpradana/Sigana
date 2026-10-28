@@ -274,72 +274,17 @@
     min-width: 0;
 }
 
-.category-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.category-card {
-    min-height: 150px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 18px;
+.tips-toolbar {
+    margin-bottom: 14px;
+    padding: 16px;
     border: 1px solid var(--line);
     border-radius: 14px;
     background: white;
-    color: var(--text);
-    text-align: left;
-    cursor: pointer;
 }
-
-.category-card:hover {
-    border-color: var(--teal);
-    transform: translateY(-2px);
-}
-
-.category-count,
-.category-card > span:not(.category-link) {
-    color: var(--muted);
-    font-size: 11px;
-    line-height: 1.5;
-}
-
-.category-card strong {
-    font-size: 16px;
-}
-
-.category-link {
-    margin-top: auto;
-    color: var(--teal);
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.tip-detail > h2 {
-    margin: 16px 0 12px;
-    font-size: 20px;
-}
-
-.back-to-categories {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--teal);
-    font: inherit;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.phase-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 14px;
-}
-
+.tips-toolbar h2 { margin: 0; font-size: 15px; }
+.tips-toolbar p { margin: 5px 0 13px; color: var(--muted); font-size: 12px; }
+.filter-label { display: block; margin: 12px 0 7px; font-size: 11px; font-weight: bold; }
+.phase-filters { display: flex; flex-wrap: wrap; gap: 8px; }
 .phase-filter {
     padding: 8px 13px;
     border: 1px solid var(--line);
@@ -350,29 +295,24 @@
     font-size: 11px;
     cursor: pointer;
 }
-
-.phase-filter.active {
-    border-color: var(--teal);
-    background: var(--teal);
-    color: white;
-}
-
-.tip-card small {
-    color: var(--teal);
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.tip-card[hidden] {
-    display: none;
-}
-
-@media (max-width: 680px) {
-    .category-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
+.phase-filter:hover { border-color: var(--teal); }
+.phase-filter.active { border-color: var(--teal); background: var(--teal); color: white; }
+.tips-toolbar .notice { margin-top: 12px; }
+.tip-card small { color: var(--teal); font-size: 10px; font-weight: bold; }
+.tip-card[hidden] { display: none; }
+.tips-no-results { grid-column: 1 / -1; margin: 0; padding: 18px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); text-align: center; }
+html[data-theme="dark"] .tips-toolbar,
+html[data-theme="dark"] .contacts { background: var(--sigana-surface) !important; border-color: var(--sigana-line) !important; }
+html[data-theme="dark"] .phase-filter { background: var(--sigana-surface-soft); border-color: var(--sigana-line); color: var(--sigana-text); }
+html[data-theme="dark"] .phase-filter.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+html[data-theme="dark"] .contact { border-color: var(--sigana-line); }
+html[data-theme="dark"] .contact:hover { background: var(--sigana-surface-soft); }
+html[data-theme="dark"] .tip-category { background: #263d42; color: #a9e1e5; }
+.tips-grid .tip-card { min-height: 0; padding: 16px; }
+.tip-card h2 { font-size: 14px; }
+.tip-card p { font-size: 12px; }
+.tip-card img { display: block; width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; }
+.tip-category { display: inline-flex; margin: 0 0 7px; padding: 4px 8px; border-radius: 20px; background: #e8f2f3; color: var(--teal); font-size: 10px; font-weight: bold; }
         @media (max-width: 900px) {
             .content {
                 grid-template-columns: 1fr;
@@ -440,8 +380,8 @@
             cursor: pointer;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=3">
-    <script src="{{ asset('js/sigana-theme.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 
 <body>
@@ -502,61 +442,47 @@
         </header>
 
         <div class="content">
-            @php
-    $tipsByCategory = $tips->groupBy(fn ($tip) => $tip->category ?: 'Panduan umum');
-@endphp
-
-<div class="tips-area">
-    <div class="category-grid" id="tipsOverview">
-        @forelse ($tipsByCategory as $category => $categoryTips)
-            <button class="category-card" type="button" data-category="{{ $category }}">
-                <span class="category-count">{{ $categoryTips->count() }} panduan</span>
-                <strong>{{ $category }}</strong>
-                <span>Langkah keselamatan sebelum, saat, dan sesudah bencana.</span>
-                <span class="category-link">Lihat panduan <b>→</b></span>
-            </button>
-        @empty
-            <div class="tips-empty">
-                Belum ada tips keselamatan di database.
-            </div>
-        @endforelse
-    </div>
-
-    <section class="tip-detail" id="tipDetail" hidden>
-        <button class="back-to-categories" id="backToCategories" type="button">
-            ← Kembali ke jenis bencana
-        </button>
-
-        <h2 id="selectedCategory"></h2>
-
-        <div class="phase-filters" aria-label="Pilih tahap panduan">
-            <button class="phase-filter active" type="button" data-phase="semua">Semua</button>
-            <button class="phase-filter" type="button" data-phase="sebelum">Sebelum</button>
-            <button class="phase-filter" type="button" data-phase="saat">Saat</button>
-            <button class="phase-filter" type="button" data-phase="sesudah">Sesudah</button>
-        </div>
-
-        <div class="tips-grid" id="tipCards">
-            @foreach ($tips as $tip)
-                @php $tipCategory = $tip->category ?: 'Panduan umum'; @endphp
-
-                <article class="tip-card"
-                         data-category="{{ $tipCategory }}"
-                         data-phase="{{ Illuminate\Support\Str::lower($tip->phase) }}">
-                    <div>
-                        @if ($tip->image)
-                            <img src="{{ \Illuminate\Support\Str::startsWith($tip->image, ['http://', 'https://', '/']) ? $tip->image : asset('storage/' . $tip->image) }}" alt="{{ $tip->title }}" style="display:block; width:100%; max-height:190px; margin-bottom:12px; border-radius:10px; object-fit:cover;">
-                        @endif
-                        <small>{{ $tip->phase }}</small>
-                        <h2>{{ $tip->title }}</h2>
-                        <p>{{ $tip->content }}</p>
+            @php $tipCategories = $tips->pluck('category')->filter()->unique()->values(); @endphp
+            <div class="tips-area">
+                <section class="tips-toolbar" aria-label="Filter panduan keselamatan">
+                    <h2>Pilih panduan yang dibutuhkan</h2>
+                    <p>Gunakan filter jenis bencana atau tahap untuk menemukan langkah yang relevan.</p>
+                    <span class="filter-label">Jenis bencana</span>
+                    <div class="phase-filters" id="categoryFilters">
+                        <button class="phase-filter active" type="button" data-category="semua">Semua</button>
+                        @foreach ($tipCategories as $category)
+                            <button class="phase-filter" type="button" data-category="{{ $category }}">{{ $category }}</button>
+                        @endforeach
                     </div>
-                </article>
-            @endforeach
-        </div>
-    </section>
-</div>
+                    <span class="filter-label">Tahap kejadian</span>
+                    <div class="phase-filters" aria-label="Pilih tahap panduan">
+                        <button class="phase-filter active" type="button" data-phase="semua">Semua tahap</button>
+                        <button class="phase-filter" type="button" data-phase="sebelum">Sebelum</button>
+                        <button class="phase-filter" type="button" data-phase="saat">Saat</button>
+                        <button class="phase-filter" type="button" data-phase="sesudah">Sesudah</button>
+                    </div>
+                    <p class="notice" id="tipsResultCount" aria-live="polite"></p>
+                </section>
 
+                <div class="tips-grid" id="tipCards">
+                    @forelse ($tips as $tip)
+                        @php $tipCategory = $tip->category ?: 'Panduan umum'; @endphp
+                        <article class="tip-card" data-category="{{ $tipCategory }}" data-phase="{{ Illuminate\Support\Str::lower(trim($tip->phase ?? '')) }}">
+                            <div>
+                                @if ($tip->image)
+                                    <img src="{{ \Illuminate\Support\Str::startsWith($tip->image, ['http://', 'https://', '/']) ? $tip->image : asset('storage/' . $tip->image) }}" alt="Ilustrasi {{ $tip->title }}" loading="lazy">
+                                @endif
+                                <span class="tip-category">{{ $tipCategory }}</span>
+                                <small>{{ $tip->phase ?: 'Panduan umum' }}</small>
+                                <h2>{{ $tip->title }}</h2>
+                                <p>{{ $tip->content }}</p>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="tips-empty">Belum ada tips keselamatan di database.</div>
+                    @endforelse
+                </div>
+            </div>
             <aside class="contact-column" aria-label="Kontak darurat">
                 <a class="call-112" href="tel:112">
                     <span>
@@ -609,57 +535,45 @@
 </div>
 
 <script>
-    const overview = document.getElementById('tipsOverview');
-    const detail = document.getElementById('tipDetail');
-    const categoryTitle = document.getElementById('selectedCategory');
     const tipCards = [...document.querySelectorAll('.tip-card')];
-    let selectedCategory = '';
+    const resultCount = document.getElementById('tipsResultCount');
+    const noResults = document.createElement('p');
+    noResults.className = 'tips-no-results';
+    noResults.textContent = 'Tidak ada panduan untuk filter ini. Coba pilih jenis atau tahap lain.';
+    noResults.hidden = true;
+    document.getElementById('tipCards')?.append(noResults);
+    let selectedCategory = 'semua';
     let selectedPhase = 'semua';
 
     function filterTips() {
+        let visibleCount = 0;
         tipCards.forEach((card) => {
-            const categoryMatches = card.dataset.category === selectedCategory;
-            const phaseMatches =
-                selectedPhase === 'semua' || card.dataset.phase === selectedPhase;
-
+            const categoryMatches = selectedCategory === 'semua' || card.dataset.category === selectedCategory;
+            const phaseMatches = selectedPhase === 'semua' || card.dataset.phase.includes(selectedPhase);
             card.hidden = !(categoryMatches && phaseMatches);
+            if (!card.hidden) visibleCount++;
         });
+        if (resultCount) resultCount.textContent = `${visibleCount} panduan ditampilkan`;
+        noResults.hidden = visibleCount !== 0;
     }
 
-    overview?.addEventListener('click', (event) => {
-        const button = event.target.closest('.category-card');
-        if (!button) return;
-
-        selectedCategory = button.dataset.category;
-        selectedPhase = 'semua';
-        categoryTitle.textContent = selectedCategory;
-        overview.hidden = true;
-        detail.hidden = false;
-
-        document.querySelectorAll('.phase-filter').forEach((filter) => {
-            filter.classList.toggle(filter.dataset.phase === 'semua' ? 'active' : 'inactive',
-                filter.dataset.phase === 'semua');
-        });
-
-        filterTips();
-    });
-
-    document.getElementById('backToCategories')?.addEventListener('click', () => {
-        detail.hidden = true;
-        overview.hidden = false;
-    });
-
-    document.querySelectorAll('.phase-filter').forEach((button) => {
+    document.querySelectorAll('#categoryFilters [data-category]').forEach((button) => {
         button.addEventListener('click', () => {
-            selectedPhase = button.dataset.phase;
-
-            document.querySelectorAll('.phase-filter').forEach((filter) => {
-                filter.classList.toggle('active', filter === button);
-            });
-
+            selectedCategory = button.dataset.category;
+            document.querySelectorAll('#categoryFilters [data-category]').forEach((item) => item.classList.toggle('active', item === button));
             filterTips();
         });
     });
+
+    document.querySelectorAll('.phase-filters [data-phase]').forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedPhase = button.dataset.phase;
+            document.querySelectorAll('.phase-filters [data-phase]').forEach((item) => item.classList.toggle('active', item === button));
+            filterTips();
+        });
+    });
+
+    filterTips();
 </script>
 </body>
 </html>
