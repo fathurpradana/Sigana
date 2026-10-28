@@ -279,3 +279,18 @@ html[data-theme="dark"] .detail-content .emergency-button {
     border-color: #a34f3c !important;
     color: #ffad96 !important;
 }
+html[data-theme="dark"] .map-panel .panel-heading { background-color: var(--sigana-surface) !important; color: var(--sigana-text) !important; }
+html[data-theme="dark"] .map-panel .map-heading-copy h2,
+html[data-theme="dark"] .map-panel .map-heading-copy p { color: var(--sigana-text) !important; }
+html[data-theme="dark"] .map-state { background-color: rgb(27 41 45 / 96%) !important; color: var(--sigana-text) !important; }
+html[data-theme="dark"] #sigana-map .leaflet-control-zoom a { background-color: var(--sigana-surface) !important; border-color: var(--sigana-line) !important; color: var(--sigana-text) !important; }
+html[data-theme="dark"] #sigana-map .leaflet-control-attribution { background-color: rgb(27 41 45 / 92%) !important; color: var(--sigana-text) !important; }
+html[data-theme="dark"] #sigana-map .leaflet-control-attribution a { color: #83d5df !important; }
+html[data-theme="dark"] #sigana-map .leaflet-popup-content-wrapper,
+html[data-theme="dark"] #sigana-map .leaflet-popup-tip { background-color: var(--sigana-surface) !important; color: var(--sigana-text) !important; }
+html[data-theme="dark"] #sigana-map .leaflet-popup-content { color: var(--sigana-text) !important; }
+html[data-theme="dark"] #sigana-map .map-popup-location,
+html[data-theme="dark"] #sigana-map .map-popup-time { color: var(--sigana-muted) !important; }
+html[data-theme="dark"] #sigana-map .map-popup-status { background-color: #334349 !important; color: #d9eeee !important; }
+html[data-theme="dark"] #sigana-map .map-popup-link,
+html[data-theme="dark"] .map-region { color: #83d5df !important; }

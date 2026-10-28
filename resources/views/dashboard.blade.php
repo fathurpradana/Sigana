@@ -397,14 +397,21 @@
             display: flex;
             min-height: 420px;
             flex-direction: column;
-            background: white;
+            background: var(--card, #fff);
         }
         .map-panel .panel-heading { flex: 0 0 auto; padding: 16px 18px 13px; }
         .map-heading-copy h2 { margin: 0; font-size: 15px; }
         .map-heading-copy p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
         .map-region { padding: 6px 10px; border: 1px solid var(--line); border-radius: 20px; color: var(--teal); font-size: 10px; font-weight: bold; }
         .map-stage { position: relative; min-height: 0; flex: 1; overflow: hidden; }
-        #sigana-map { width: 100%; height: 380px; background: #e8f1f3; }
+        #sigana-map { width: 100%; height: 380px; background: var(--surface-soft, #e8f1f3); }
+        .map-state { position: absolute; z-index: 700; inset: 12px; display: grid; place-items: center; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--card, #fff); color: var(--text); text-align: center; font-size: 13px; }
+        .map-state[hidden], .map-empty-note[hidden] { display: none; }
+        .map-empty-note { padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+        .map-popup-status { display: inline-block; margin: 7px 0 4px; padding: 3px 7px; border-radius: 999px; background: #e8f4f1; color: #105461; font-size: 10px; font-weight: 700; }
+        .map-popup-time { margin-top: 5px; color: var(--muted); font-size: 11px; }
+        .map-popup-link { display: inline-block; margin-top: 8px; color: #105461; font-weight: 700; text-decoration: none; }
+        .map-popup-link:hover { text-decoration: underline; }
         #sigana-map .leaflet-tile-pane { filter: saturate(.82) contrast(.97); }
         #sigana-map .leaflet-control-zoom { overflow: hidden; border: 1px solid #dce5e3; border-radius: 10px; box-shadow: 0 4px 14px rgb(25 55 61 / 14%); }
         #sigana-map .leaflet-control-zoom a { width: 32px; height: 32px; color: var(--teal); line-height: 32px; }
@@ -978,7 +985,7 @@
             border-radius: 50%;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=7">
     <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 
@@ -1215,13 +1222,15 @@
                     <span class="map-region">Indonesia</span>
                 </div>
                 <div class="map-stage">
-                    <div id="sigana-map"></div>
+                    <div id="sigana-map" aria-label="Peta lokasi kejadian bencana"></div>
+                    <div class="map-state" id="mapState" role="status">Memuat peta…</div>
                     <div class="map-legend-control" aria-label="Lokasi kejadian bencana">
                         <i class="map-legend-dot"></i>
                         <span>Lokasi kejadian</span>
                         <strong>{{ $mapDisasters->count() }}</strong>
                     </div>
                 </div>
+                <p class="map-empty-note" id="mapEmptyNote" hidden>Belum ada kejadian terverifikasi dengan koordinat yang aktif di peta.</p>
             </article>
         </section>
     </main>
@@ -1434,60 +1443,60 @@
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-    const map = L.map('sigana-map', { zoomControl: false, markerZoomAnimation: false }).setView([-2.5, 118], 4);
-    L.control.zoom({ position: 'topright' }).addTo(map);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
-
-    const disasterPoints = @json($mapDisasters);
-    const disasterMarkers = [];
-
-    function makeDisasterPopup(disaster) {
-        const content = document.createElement('div');
-        const title = document.createElement('strong');
-        title.textContent = disaster.title;
-        const location = document.createElement('div');
-        location.className = 'map-popup-location';
-        location.textContent = disaster.location;
-        content.append(title, location);
-        return content;
-    }
-
-    function markerStyleForCategory(category) {
-        const name = String(category || '').toLocaleLowerCase('id');
-        if (name.includes('gunung') || name.includes('vulkan')) return { icon: '🌋', color: '#c84b37' };
-        if (name.includes('tsunami')) return { icon: '🌊', color: '#2867a8' };
-        if (name.includes('banjir')) return { icon: '💧', color: '#1685a0' };
-        if (name.includes('gempa')) return { icon: '🏚️', color: '#b87818' };
-        if (name.includes('longsor')) return { icon: '⛰️', color: '#795548' };
-        return { icon: '⚠️', color: '#105461' };
-    }
-
-    disasterPoints.forEach(function (disaster) {
-        const markerStyle = markerStyleForCategory(disaster.category);
-        const disasterIcon = L.divIcon({
-            className: 'sigana-disaster-marker',
-            html: `<span style="background:${markerStyle.color}">${markerStyle.icon}</span>`,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-            popupAnchor: [0, -16]
-        });
-        const marker = L.marker([disaster.latitude, disaster.longitude], { icon: disasterIcon })
-            .addTo(map)
-            .bindPopup(makeDisasterPopup(disaster), { maxWidth: 260 });
-        disasterMarkers.push(marker);
-    });
-
-    if (disasterMarkers.length === 1) {
-        map.setView(disasterMarkers[0].getLatLng(), 6);
-    } else if (disasterMarkers.length > 1) {
-        map.fitBounds(L.featureGroup(disasterMarkers).getBounds().pad(0.18), { maxZoom: 7 });
-    }
+    (function () {
+        const state = document.getElementById('mapState');
+        const emptyNote = document.getElementById('mapEmptyNote');
+        const points = @json($mapDisasters);
+        function showMapState(message) { state.textContent = message; state.hidden = false; }
+        if (typeof L === 'undefined') {
+            showMapState('Peta tidak dapat dimuat. Periksa koneksi internet lalu muat ulang halaman.');
+            return;
+        }
+        try {
+            const map = L.map('sigana-map', { zoomControl: false, markerZoomAnimation: false }).setView([-2.5, 118], 4);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' }).addTo(map);
+            const markers = [];
+            let tileLoaded = false;
+            const loadingTimeout = window.setTimeout(function () { if (!tileLoaded) showMapState('Peta dasar belum merespons. Coba muat ulang atau periksa koneksi internet.'); }, 10000);
+            tiles.once('load', function () { tileLoaded = true; window.clearTimeout(loadingTimeout); state.hidden = true; });
+            tiles.once('tileerror', function () { if (!tileLoaded) showMapState('Sebagian peta gagal dimuat. Periksa koneksi internet.'); });
+            function markerStyleForCategory(category) {
+                const name = String(category || '').toLocaleLowerCase('id');
+                if (name.includes('gunung') || name.includes('vulkan')) return { icon: '🌋', color: '#c84b37' };
+                if (name.includes('tsunami')) return { icon: '🌊', color: '#2867a8' };
+                if (name.includes('banjir')) return { icon: '💧', color: '#1685a0' };
+                if (name.includes('gempa')) return { icon: '🏚️', color: '#b87818' };
+                if (name.includes('longsor')) return { icon: '⛰️', color: '#795548' };
+                return { icon: '⚠️', color: '#105461' };
+            }
+            function makePopup(disaster) {
+                const content = document.createElement('div');
+                const title = document.createElement('strong'); title.textContent = disaster.title || 'Kejadian bencana';
+                const location = document.createElement('div'); location.className = 'map-popup-location'; location.textContent = [disaster.category, disaster.location].filter(Boolean).join(' · ');
+                const status = document.createElement('span'); status.className = 'map-popup-status'; status.textContent = disaster.status || 'Disetujui';
+                content.append(title, location, status);
+                if (disaster.occurred_at) { const time = document.createElement('div'); time.className = 'map-popup-time'; time.textContent = 'Waktu kejadian: ' + disaster.occurred_at; content.append(time); }
+                const link = document.createElement('a'); link.className = 'map-popup-link'; link.href = disaster.url; link.textContent = 'Lihat detail kejadian →'; content.append(link);
+                return content;
+            }
+            points.forEach(function (disaster) {
+                const style = markerStyleForCategory(disaster.category);
+                const icon = L.divIcon({ className: 'sigana-disaster-marker', html: `<span style="background:${style.color}">${style.icon}</span>`, iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16] });
+                markers.push(L.marker([disaster.latitude, disaster.longitude], { icon: icon }).addTo(map).bindPopup(makePopup(disaster), { maxWidth: 280 }));
+            });
+            emptyNote.hidden = markers.length > 0;
+            if (markers.length === 1) map.setView(markers[0].getLatLng(), 6);
+            else if (markers.length > 1) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.18), { maxZoom: 7 });
+            window.setTimeout(function () { map.invalidateSize(); }, 100);
+        } catch (error) {
+            console.error('SIGANA map initialization failed:', error);
+            showMapState('Peta mengalami kendala saat dibuka. Muat ulang halaman untuk mencoba lagi.');
+        }
+    })();
 </script>
+
+
 </body>
 </html>

@@ -380,7 +380,7 @@ html[data-theme="dark"] .tip-category { background: #263d42; color: #a9e1e5; }
             cursor: pointer;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=7">
     <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 

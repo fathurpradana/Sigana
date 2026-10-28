@@ -20,7 +20,17 @@ class DashboardController extends Controller
         $hasProfilePhoto = Auth::check() && DB::table('users')->where('id', Auth::id())->whereNotNull('profile_photo')->exists();
 
         $mapCutoff = Carbon::now('UTC')->subDays(7);
-        $mapDisasters = $disasters->filter(fn ($disaster) => $disaster->latitude !== null && $disaster->longitude !== null && $disaster->approved_at !== null && Carbon::parse($disaster->approved_at, 'UTC')->greaterThanOrEqualTo($mapCutoff))->map(fn ($disaster) => ['id' => $disaster->id, 'title' => $disaster->title, 'category' => $disaster->category, 'location' => $disaster->location, 'latitude' => (float) $disaster->latitude, 'longitude' => (float) $disaster->longitude])->values();
+        $mapDisasters = $disasters->filter(fn ($disaster) => $disaster->latitude !== null && $disaster->longitude !== null && $disaster->approved_at !== null && Carbon::parse($disaster->approved_at, 'UTC')->greaterThanOrEqualTo($mapCutoff))->map(fn ($disaster) => [
+            'id' => $disaster->id,
+            'title' => $disaster->title,
+            'category' => $disaster->category,
+            'location' => $disaster->location,
+            'status' => $disaster->status,
+            'occurred_at' => $disaster->occurred_at ? Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : null,
+            'latitude' => (float) $disaster->latitude,
+            'longitude' => (float) $disaster->longitude,
+            'url' => route('bencana.detail', $disaster->id),
+        ])->values();
 
         $stats = [
             'active' => DB::table('disasters')->where('verification_status', 'Disetujui')->whereRaw('LOWER(status) IN (?, ?)', ['aktif', 'dilaporkan'])->count(),

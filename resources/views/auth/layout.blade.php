@@ -231,7 +231,7 @@
             .form-panel { padding: 36px 24px 48px; }
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=6">
+    <link rel="stylesheet" href="{{ asset('css/sigana-theme.css') }}?v=7">
     <script src="{{ asset('js/sigana-theme.js') }}?v=4" defer></script>
 </head>
 
