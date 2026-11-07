@@ -466,9 +466,9 @@
                 <section class="profile-card">
                     <div class="avatar" aria-hidden="true">
                         @if ($hasProfilePhoto ?? false)
-                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="" onerror="this.onerror=null;this.src='{{ url('/images/default-avatar.png') }}'">
                         @else
-                            ♙
+                            <img src="{{ url('/images/default-avatar.png') }}" alt="Foto profil default">
                         @endif
                     </div>
                     <h2>{{ auth()->user()?->name ?? '[Nama pengguna]' }}</h2>

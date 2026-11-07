@@ -1125,18 +1125,18 @@
                     <button class="user-avatar" id="profileToggle" type="button" title="Buka menu profil"
                         aria-label="Buka menu profil" aria-expanded="false" aria-controls="profileMenu">
                         @if (auth()->check() && ($hasProfilePhoto ?? false))
-                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                            <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="" onerror="this.onerror=null;this.src='{{ url('/images/default-avatar.png') }}'">
                         @else
-                            {{ strtoupper(substr(auth()->user()->name ?? 'P', 0, 1)) }}
+                            <img src="{{ url('/images/default-avatar.png') }}" alt="">
                         @endif
                     </button>
                     <section class="profile-menu" id="profileMenu" aria-label="Menu profil" hidden>
                         <div class="profile-menu-heading">
                                                         <div class="profile-menu-avatar" aria-hidden="true">
                                 @if (auth()->check() && ($hasProfilePhoto ?? false))
-                                    <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="">
+                                    <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="" onerror="this.onerror=null;this.src='{{ url('/images/default-avatar.png') }}'">
                                 @else
-                                    {{ strtoupper(substr(auth()->user()->name ?? 'T', 0, 1)) }}
+                                    <img src="{{ url('/images/default-avatar.png') }}" alt="">
                                 @endif
                             </div>
                             <div class="profile-menu-identity">

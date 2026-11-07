@@ -33,7 +33,19 @@ class ProfileController extends Controller
 
         abort_unless($photo && $photo->profile_photo, 404);
 
-        return response($photo->profile_photo, 200, [
+        // PostgreSQL may return BYTEA as a stream or as a hex string (\\x...).
+        $photoBytes = $photo->profile_photo;
+        if (is_resource($photoBytes)) {
+            $photoBytes = stream_get_contents($photoBytes);
+        }
+
+        if (is_string($photoBytes) && str_starts_with($photoBytes, '\\x')) {
+            $decodedPhoto = hex2bin(substr($photoBytes, 2));
+            abort_if($decodedPhoto === false, 404, 'Data foto profil tidak valid.');
+            $photoBytes = $decodedPhoto;
+        }
+
+        return response($photoBytes, 200, [
             'Content-Type' => $photo->profile_photo_mime ?: 'image/jpeg',
             'Cache-Control' => 'private, no-store, no-cache, must-revalidate, max-age=0',
             'Pragma' => 'no-cache',
@@ -64,11 +76,21 @@ class ProfileController extends Controller
             $user->update($validated);
 
             if ($uploadedPhoto) {
-                DB::table('users')->where('id', $user->id)->update([
-                    'profile_photo' => file_get_contents($uploadedPhoto->getRealPath()),
-                    'profile_photo_mime' => $uploadedPhoto->getMimeType(),
-                    'update_at' => now(),
-                ]);
+                $photoBytes = file_get_contents($uploadedPhoto->getRealPath());
+
+                if (DB::connection()->getDriverName() === 'pgsql') {
+                    // Send binary data as Base64 text, then decode it to PostgreSQL BYTEA.
+                    DB::statement(
+                        'UPDATE users SET profile_photo = decode(?, ?), profile_photo_mime = ?, update_at = ? WHERE id = ?',
+                        [base64_encode($photoBytes), 'base64', $uploadedPhoto->getMimeType(), now(), $user->id]
+                    );
+                } else {
+                    DB::table('users')->where('id', $user->id)->update([
+                        'profile_photo' => $photoBytes,
+                        'profile_photo_mime' => $uploadedPhoto->getMimeType(),
+                        'update_at' => now(),
+                    ]);
+                }
             }
         });
 

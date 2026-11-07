@@ -386,9 +386,9 @@
                     <section class="photo-editor" aria-label="Foto profil">
                         <div class="photo-preview" id="photoPreview">
                             @if ($hasProfilePhoto)
-                                <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="Foto profil saat ini">
+                                <img src="{{ route('profil.photo') }}?v={{ session('profile_photo_version', '0') }}" alt="Foto profil saat ini" onerror="this.onerror=null;this.src='{{ url('/images/default-avatar.png') }}'">
                             @else
-                                <span>{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                <img src="{{ url('/images/default-avatar.png') }}" alt="Foto profil default">
                             @endif
                         </div>
                         <div class="photo-controls">
