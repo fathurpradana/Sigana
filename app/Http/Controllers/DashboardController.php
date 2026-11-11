@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\DisasterCategoryScope;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $disasters = DB::table('disasters as d')
-            ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
+        $disasterQuery = DB::table('disasters as d')
+            ->join('disaster_categories as c', 'c.id', '=', 'd.category_id');
+        DisasterCategoryScope::apply($disasterQuery, 'c.name');
+        $disasters = $disasterQuery
             ->where('d.verification_status', 'Disetujui')
             ->select('d.id', 'd.title', 'd.location', 'd.latitude', 'd.longitude', 'd.occurred_at', 'd.created_at', 'd.status', 'd.description', 'd.photo', 'd.updated_at', 'd.approved_at', 'c.name as category')
             ->orderByRaw('COALESCE(d.created_at, d.occurred_at) DESC')
@@ -19,28 +22,17 @@ class DashboardController extends Controller
 
         $hasProfilePhoto = Auth::check() && DB::table('users')->where('id', Auth::id())->whereNotNull('profile_photo')->exists();
 
-        $mapCutoff = Carbon::now('UTC')->subDays(7);
-        $mapDisasters = $disasters->filter(fn ($disaster) => $disaster->latitude !== null && $disaster->longitude !== null && $disaster->approved_at !== null && Carbon::parse($disaster->approved_at, 'UTC')->greaterThanOrEqualTo($mapCutoff))->map(fn ($disaster) => [
-            'id' => $disaster->id,
-            'title' => $disaster->title,
-            'category' => $disaster->category,
-            'location' => $disaster->location,
-            'status' => $disaster->status,
-            'occurred_at' => $disaster->occurred_at ? Carbon::parse($disaster->occurred_at, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y · H.i') . ' WIB' : null,
-            'latitude' => (float) $disaster->latitude,
-            'longitude' => (float) $disaster->longitude,
-            'url' => route('bencana.detail', $disaster->id),
-        ])->values();
-
+        $scopedStats = DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id');
+        DisasterCategoryScope::apply($scopedStats, 'c.name');
         $stats = [
-            'active' => DB::table('disasters')->where('verification_status', 'Disetujui')->whereRaw('LOWER(status) IN (?, ?)', ['aktif', 'dilaporkan'])->count(),
-            'monitored' => DB::table('disasters')->where('verification_status', 'Disetujui')->whereRaw('LOWER(status) = ?', ['dipantau'])->count(),
-            'areas' => DB::table('disasters')->where('verification_status', 'Disetujui')->whereNotNull('location')->distinct()->count('location'),
+            'active' => (clone $scopedStats)->where('d.verification_status', 'Disetujui')->whereRaw('LOWER(d.status) IN (?, ?)', ['aktif', 'dilaporkan'])->count(),
+            'monitored' => (clone $scopedStats)->where('d.verification_status', 'Disetujui')->whereRaw('LOWER(d.status) = ?', ['dipantau'])->count(),
+            'areas' => (clone $scopedStats)->where('d.verification_status', 'Disetujui')->whereNotNull('d.location')->distinct()->count('d.location'),
         ];
 
-        $latest = DB::table('disasters')
-            ->where('verification_status', 'Disetujui')
-            ->selectRaw('MAX(COALESCE(created_at, occurred_at)) as latest_update')
+        $latest = (clone $scopedStats)
+            ->where('d.verification_status', 'Disetujui')
+            ->selectRaw('MAX(COALESCE(d.created_at, d.occurred_at)) as latest_update')
             ->value('latest_update');
         $stats['latest'] = $latest ? Carbon::parse($latest, 'UTC')->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y') : '—';
 
@@ -94,6 +86,6 @@ class DashboardController extends Controller
 
         $notifications = $notifications->concat($historyNotifications)->take(5);
 
-        return view('dashboard', compact('disasters', 'mapDisasters', 'stats', 'notifications', 'unreadNotifications', 'hasProfilePhoto'));
+        return view('dashboard', compact('disasters', 'stats', 'notifications', 'unreadNotifications', 'hasProfilePhoto'));
     }
 }

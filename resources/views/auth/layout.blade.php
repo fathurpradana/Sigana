@@ -240,12 +240,7 @@
         <section class="brand-panel">
             <div class="brand-content">
                 <div class="brand-icon" aria-hidden="true">
-                    <svg viewBox="0 0 32 32" fill="none">
-                        <path d="M5 20c3 0 3-8 6-8s3 8 6 8 3-8 6-8"
-                              stroke="currentColor" stroke-width="2.2"
-                              stroke-linecap="round"/>
-                        <circle cx="24" cy="8" r="2.5" fill="#e06445"/>
-                    </svg>
+                    <img src="{{ asset('images/sigana-mark.svg') }}" alt="" style="width:25px;height:25px">
                 </div>
                 <h1 class="brand-title">SIGANA</h1>
                 <p class="brand-description">

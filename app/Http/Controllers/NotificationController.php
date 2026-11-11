@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\DisasterCategoryScope;
 
 class NotificationController extends Controller
 {
@@ -99,6 +100,7 @@ class NotificationController extends Controller
                 ->where('c.name', $category)
                 ->where('d.location', $location)
                 ->where('d.verification_status', 'Disetujui');
+            DisasterCategoryScope::apply($query, 'c.name');
 
             if ($notification->created_at) {
                 $query->where('d.created_at', $notification->created_at);
@@ -107,14 +109,13 @@ class NotificationController extends Controller
             $disasterId = $query->orderByDesc('d.id')->value('d.id');
 
             if (! $disasterId) {
-                $disasterId = DB::table('disasters as d')
+                $fallbackQuery = DB::table('disasters as d')
                     ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
                     ->where('c.name', $category)
                     ->where('d.location', $location)
-                    ->where('d.verification_status', 'Disetujui')
-                    ->orderByDesc('d.created_at')
-                    ->orderByDesc('d.id')
-                    ->value('d.id');
+                    ->where('d.verification_status', 'Disetujui');
+                DisasterCategoryScope::apply($fallbackQuery, 'c.name');
+                $disasterId = $fallbackQuery->orderByDesc('d.created_at')->orderByDesc('d.id')->value('d.id');
             }
         }
 

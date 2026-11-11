@@ -421,11 +421,7 @@ a.report-submit {
 <div class="app">
     <aside class="sidebar">
         <div class="brand">
-            <div class="brand-icon"><svg viewBox="0 0 32 32" fill="none" style="width:25px;height:25px">
-    <path d="M5 20c3 0 3-8 6-8s3 8 6 8 3-8 6-8"
-          stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="24" cy="8" r="2.5" fill="#e06445"/>
-</svg></div>
+            <div class="brand-icon"><img src="{{ asset('images/sigana-mark.svg') }}" alt="" style="width:25px;height:25px"></div>
             <div>
                 <h2 class="brand-name">SIGANA</h2>
                 <p class="brand-caption">Monitoring Bencana Alam</p>
@@ -436,9 +432,12 @@ a.report-submit {
             <a href="{{ auth()->check() ? route('dashboard') : route('guest.home') }}">
                 <span>⌂</span> Dashboard
             </a>
+            <a class="{{ request()->routeIs('peta.*') ? 'active' : '' }}" href="{{ route('peta.index') }}"><span>◎</span> Peta</a>
             <a href="{{ route('bencana.index') }}"><span>⚠</span> Bencana</a>
             <a href="{{ route('tips.index') }}"><span>♡</span> Tips &amp; darurat</a>
-            <a class="active" href="{{ route('bantuan.index') }}"><span>◌</span> Bantuan</a>
+            <a class="{{ ($page ?? 'help') === 'help' ? 'active' : '' }}" href="{{ route('bantuan.index') }}"><span>◌</span> Bantuan</a>
+            <a class="{{ ($page ?? 'help') === 'report' ? 'active' : '' }}" href="{{ route('bantuan.report.form') }}"><span>＋</span> Lapor Bencana</a>
+            <a class="{{ request()->routeIs('damage-scan.*') ? 'active' : '' }}" href="{{ route('damage-scan.index') }}"><span>⌕</span> Scan Kerusakan</a>
             <a href="{{ route('profil.index') }}">
     <span>♙</span> Profil
 </a>
@@ -610,17 +609,9 @@ a.report-submit {
 
 @else
 
-    <aside class="report-card">
-        <h2>Lapor bencana</h2>
-        <p class="report-intro">
-            Bantu petugas dengan informasi yang jelas dan akurat.
-        </p>
-
-        <a class="report-submit"
-           href="{{ route('bantuan.report.form') }}">
-            Buka formulir laporan
-        </a>
-
+    <aside class="report-card emergency-help-card">
+        <h2>Butuh bantuan darurat?</h2>
+        <p class="report-intro">Hubungi layanan darurat terpadu jika Anda atau orang di sekitar membutuhkan pertolongan segera.</p>
         <a class="emergency-button" href="tel:112">
             Hubungi nomor darurat · 112
         </a>
@@ -659,7 +650,7 @@ a.report-submit {
         if (lowerMessage.includes('bencana') || lowerMessage.includes('kejadian')) {
             reply = 'Buka menu Bencana untuk melihat informasi kejadian dan imbauan keselamatan.';
         } else if (lowerMessage.includes('lapor')) {
-            reply = 'Isi jenis kejadian, lokasi, dan keterangan pada form Lapor bencana. Laporan dapat dikirim melalui formulir di halaman ini.';
+            reply = 'Pilih menu Lapor Bencana di navigasi untuk mengisi dan mengirim laporan kejadian.';
         } else if (lowerMessage.includes('darurat') || lowerMessage.includes('112')) {
             reply = 'Untuk keadaan darurat, hubungi 112 atau nomor instansi terkait pada halaman Tips & Darurat.';
         } else {

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use App\Support\DisasterCategoryScope;
 
 class DisasterReportController extends Controller
 {
@@ -19,6 +20,12 @@ class DisasterReportController extends Controller
             'occurred_at' => ['required', 'date'],
             'title' => ['required', 'string', 'max:255'],
         ]);
+
+        abort_unless(
+            DisasterCategoryScope::query()->where('id', $validated['category_id'])->exists(),
+            422,
+            'Laporan SIGANA saat ini hanya menerima kategori Banjir dan Gempa.'
+        );
 
         $occurredAt = Carbon::parse($validated['occurred_at'], 'Asia/Jakarta')
         ->utc()

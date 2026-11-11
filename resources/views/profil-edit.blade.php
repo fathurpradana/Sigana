@@ -331,11 +331,7 @@
 <div class="app">
     <aside class="sidebar">
         <div class="brand">
-            <div class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" style="width:25px;height:25px">
-    <path d="M5 20c3 0 3-8 6-8s3 8 6 8 3-8 6-8"
-          stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="24" cy="8" r="2.5" fill="#e06445"/>
-</svg></div>
+            <div class="brand-icon" aria-hidden="true"><img src="{{ asset('images/sigana-mark.svg') }}" alt="" style="width:25px;height:25px"></div>
             <div>
                 <h2 class="brand-name">SIGANA</h2>
                 <p class="brand-caption">Monitoring Bencana Alam</p>
@@ -346,9 +342,12 @@
             <a href="{{ auth()->check() ? route('dashboard') : route('guest.home') }}">
                 <span>⌂</span> Dashboard
             </a>
+            <a class="{{ request()->routeIs('peta.*') ? 'active' : '' }}" href="{{ route('peta.index') }}"><span>◎</span> Peta</a>
             <a href="{{ route('bencana.index') }}"><span>⚠</span> Bencana</a>
             <a href="{{ route('tips.index') }}"><span>♡</span> Tips &amp; darurat</a>
             <a href="{{ route('bantuan.index') }}"><span>◌</span> Bantuan</a>
+            <a class="{{ request()->routeIs('bantuan.report.form') ? 'active' : '' }}" href="{{ route('bantuan.report.form') }}"><span>＋</span> Lapor Bencana</a>
+            <a class="{{ request()->routeIs('damage-scan.*') ? 'active' : '' }}" href="{{ route('damage-scan.index') }}"><span>⌕</span> Scan Kerusakan</a>
             <a class="active" href="{{ route('profil.index') }}"><span>♙</span> Profil</a>
         </nav>
 

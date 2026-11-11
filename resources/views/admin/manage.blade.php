@@ -38,7 +38,7 @@
 <body>
 <header>
     <div class="brand"><strong>SIGANA · PANEL ADMIN</strong><span>Masuk sebagai {{ auth()->user()->name }}</span></div>
-    <div class="header-actions"><a href="{{ route('admin.dashboard') }}">Ringkasan</a><form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form></div>
+    <div class="header-actions"><a href="{{ route('admin.dashboard') }}">Ringkasan</a><a href="{{ route('peta.index') }}">Peta kejadian</a><form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form></div>
 </header>
 <div class="shell">
     <aside aria-label="Navigasi pengelolaan">
@@ -109,9 +109,8 @@
             </div>
         </section>
 
-        <section class="panel" id="kategori-admin"><div class="panel-head"><div><h2>Kategori bencana</h2><p class="hint">Kategori dipakai oleh berita dan tips keselamatan.</p></div></div>
-            <details class="create-box"><summary>＋ Tambah kategori</summary><form method="POST" action="{{ route('admin.categories.store') }}">@csrf<div class="form-grid"><label class="field">Nama kategori<input name="name" required maxlength="100"></label><label class="field">Keterangan<input name="description" maxlength="2000"></label></div><div class="form-actions"><button class="button">Tambah kategori</button></div></form></details>
-            <div class="record-list">@forelse($categories as $item)<article class="record"><div class="record-top"><div><strong>{{ $item->name }}</strong><div class="record-meta">{{ $item->description }}</div></div></div><details><summary>Edit kategori</summary><form method="POST" action="{{ route('admin.categories.update', $item->id) }}">@csrf @method('PUT')<div class="form-grid"><label class="field">Nama<input name="name" value="{{ $item->name }}" required></label><label class="field">Keterangan<input name="description" value="{{ $item->description }}"></label></div><div class="form-actions"><button class="button">Simpan</button></div></form><form class="delete-form" method="POST" action="{{ route('admin.categories.destroy', $item->id) }}" onsubmit="return confirm('Hapus kategori ini?')">@csrf @method('DELETE')<button class="button danger">Hapus kategori</button></form></details></article>@empty<p class="empty">Belum ada kategori.</p>@endforelse</div>
+        <section class="panel" id="kategori-admin"><div class="panel-head"><div><h2>Kategori fokus SIGANA</h2><p class="hint">SIGANA saat ini berfokus pada Banjir dan Gempa. Kategori lain tetap tersimpan di database, tetapi tidak ditampilkan.</p></div></div>
+            <div class="record-list">@forelse($categories as $item)<article class="record"><div class="record-top"><div><strong>{{ $item->name }}</strong><div class="record-meta">{{ $item->description }}</div></div></div></article>@empty<p class="empty">Kategori Banjir dan Gempa belum tersedia di database.</p>@endforelse</div>
         </section>
 
         <section class="panel" id="tips-admin"><div class="panel-head"><div><h2>Tips keselamatan</h2><p class="hint">Konten ini tampil pada halaman Tips &amp; darurat.</p></div></div>

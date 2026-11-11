@@ -11,6 +11,8 @@
         header strong { font-size: 20px; letter-spacing: .04em; }
         header span { display: block; margin-top: 4px; color: #d2e4e5; font-size: 13px; }
         header form { margin: 0; }
+        .header-actions { display:flex; align-items:center; gap:10px; }
+        .header-actions a { padding:10px 16px; border:1px solid #ffffff70; border-radius:9px; color:white; font-size:14px; text-decoration:none; }
         button { padding: 10px 16px; border: 1px solid #ffffff70; border-radius: 9px; background: transparent; color: white; font: inherit; cursor: pointer; }
         main { width: min(1100px, 100%); margin: 0 auto; padding: 42px 24px; }
         h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); }
@@ -34,7 +36,7 @@
 <body>
 <header>
     <div><strong>SIGANA · ADMIN</strong><span>Masuk sebagai {{ auth()->user()->name }}</span></div>
-    <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form>
+    <div class="header-actions"><a href="{{ route('peta.index') }}">Peta kejadian</a><form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form></div>
 </header>
 <main>
     <h1>Panel Admin</h1>

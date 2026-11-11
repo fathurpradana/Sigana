@@ -7,8 +7,10 @@ use App\Http\Controllers\TipsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DisasterReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminController;
+use App\Support\DisasterCategoryScope;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -78,6 +80,7 @@ Route::post('/notifikasi/{id}/dibaca', [NotificationController::class, 'markRead
 Route::get('/notifikasi/{id}/buka', [NotificationController::class, 'open'])->whereNumber('id')->name('notifications.open');
 
 Route::get('/beranda', [DashboardController::class, 'index'])->name('guest.home');
+Route::get('/peta', [MapController::class, 'index'])->name('peta.index');
 
 Route::get('/bencana', [DisasterController::class, 'index'])->name('bencana.index');
 Route::get('/bencana/{id}', [DisasterController::class, 'show'])->whereNumber('id')->name('bencana.detail');
@@ -86,15 +89,21 @@ Route::get('/tips', [TipsController::class, 'index'])->name('tips.index');
 
 Route::get('/bantuan', function () {
     return view('bantuan.index', [
-        'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
+        'categories' => DisasterCategoryScope::query()->orderBy('name')->get(),
         'page' => 'help',
     ]);
 })->name('bantuan.index');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/analisis-kerusakan', [DisasterController::class, 'damageScan'])
+        ->name('damage-scan.index');
+    Route::post('/analisis-kerusakan', [DisasterController::class, 'analyzeDamage'])
+        ->middleware('throttle:5,1')
+        ->name('damage-scan.analyze');
+
     Route::get('/bantuan/lapor', function () {
         return view('bantuan.index', [
-            'categories' => DB::table('disaster_categories')->orderBy('name')->get(),
+            'categories' => DisasterCategoryScope::query()->orderBy('name')->get(),
             'page' => 'report',
         ]);
     })->name('bantuan.report.form');

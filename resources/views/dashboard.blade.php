@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | SIGANA</title>
 
-    <link rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
     <style>
         * { box-sizing: border-box; }
 
@@ -292,7 +289,7 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: minmax(260px, .75fr) minmax(0, 1.65fr);
+            grid-template-columns: minmax(0, 1fr);
             gap: 16px;
         }
 
@@ -393,54 +390,8 @@
             font-size: 10px;
         }
 
-        .map-panel {
-            display: flex;
-            min-height: 420px;
-            flex-direction: column;
-            background: var(--card, #fff);
-        }
-        .map-panel .panel-heading { flex: 0 0 auto; padding: 16px 18px 13px; }
-        .map-heading-copy h2 { margin: 0; font-size: 15px; }
-        .map-heading-copy p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
-        .map-region { padding: 6px 10px; border: 1px solid var(--line); border-radius: 20px; color: var(--teal); font-size: 10px; font-weight: bold; }
-        .map-stage { position: relative; min-height: 0; flex: 1; overflow: hidden; }
-        #sigana-map { width: 100%; height: 380px; background: var(--surface-soft, #e8f1f3); }
-        .map-state { position: absolute; z-index: 700; inset: 12px; display: grid; place-items: center; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--card, #fff); color: var(--text); text-align: center; font-size: 13px; }
-        .map-state[hidden], .map-empty-note[hidden] { display: none; }
-        .map-empty-note { padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
-        .map-popup-status { display: inline-block; margin: 7px 0 4px; padding: 3px 7px; border-radius: 999px; background: #e8f4f1; color: #105461; font-size: 10px; font-weight: 700; }
-        .map-popup-time { margin-top: 5px; color: var(--muted); font-size: 11px; }
-        .map-popup-link { display: inline-block; margin-top: 8px; color: #105461; font-weight: 700; text-decoration: none; }
-        .map-popup-link:hover { text-decoration: underline; }
-        #sigana-map .leaflet-tile-pane { filter: saturate(.82) contrast(.97); }
-        #sigana-map .leaflet-control-zoom { overflow: hidden; border: 1px solid #dce5e3; border-radius: 10px; box-shadow: 0 4px 14px rgb(25 55 61 / 14%); }
-        #sigana-map .leaflet-control-zoom a { width: 32px; height: 32px; color: var(--teal); line-height: 32px; }
-        #sigana-map .leaflet-control-attribution { padding: 3px 7px; border-radius: 7px 0 0 0; background: rgb(255 255 255 / 88%); font-size: 9px; }
-        #sigana-map .leaflet-popup-content-wrapper { border-radius: 11px; box-shadow: 0 8px 24px rgb(25 55 61 / 18%); }
-        #sigana-map .leaflet-popup-content { margin: 12px 14px; color: #19373d; font-size: 12px; line-height: 1.45; }
-        #sigana-map .leaflet-popup-content strong { display: block; margin-bottom: 4px; }
-        #sigana-map .leaflet-popup-content .map-popup-location { color: #788889; font-size: 11px; }
-#sigana-map .sigana-disaster-marker { background: transparent; border: 0; }
-        #sigana-map .sigana-disaster-marker span { display: grid; width: 28px; height: 28px; box-sizing: border-box; place-items: center; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 3px 10px rgb(24 48 54 / 35%); color: #fff; font-size: 14px; line-height: 1; }
-        .map-legend-control {
-            position: absolute;
-            z-index: 500;
-            right: 12px;
-            bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 11px;
-            border: 1px solid rgb(220 229 227 / 90%);
-            border-radius: 10px;
-            background: rgb(255 255 255 / 94%);
-            box-shadow: 0 4px 14px rgb(25 55 61 / 12%);
-            color: #536466;
-            font-size: 10px;
-            pointer-events: none;
-        }
-        .map-legend-dot { width: 9px; height: 9px; border: 2px solid white; border-radius: 50%; background: #e64e3f; box-shadow: 0 0 0 1px #e64e3f; }
-        .map-legend-control strong { color: var(--teal); font-size: 11px; }
+        .map-user-location { width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; background: #2878db; box-shadow: 0 0 0 7px rgb(40 120 219 / 20%), 0 2px 8px rgb(0 0 0 / 25%); }
+        .map-popup-image { display: block; width: 100%; max-height: 105px; margin: 0 0 8px; border-radius: 7px; object-fit: cover; }
         .map-art {
             position: absolute;
             inset: 0;
@@ -786,8 +737,6 @@
         @media (max-width: 950px) {
             .app { grid-template-columns: 260px minmax(0, 1fr); }
             .main { padding: 22px; }
-            .content-grid { grid-template-columns: 1fr; }
-            .map-panel { min-height: 360px; }
         }
 
         @media (max-width: 680px) {
@@ -873,12 +822,8 @@
 
             .stat-card { padding: 12px; }
             .stat-card strong { font-size: 17px; }
-            .map-panel { min-height: 320px; }
         }
         @media (max-width: 680px) {
-            #sigana-map { height: 320px; }
-            .map-panel { min-height: 360px; }
-            .map-legend-control { right: 8px; bottom: 28px; padding: 8px 9px; }
         }
         @media (min-width: 681px) {
     html,
@@ -994,12 +939,7 @@
     <aside class="sidebar">
         <div class="brand">
             <div class="brand-icon" aria-hidden="true">
-                <svg viewBox="0 0 32 32" fill="none">
-                    <path d="M5 20c3 0 3-8 6-8s3 8 6 8 3-8 6-8"
-                          stroke="currentColor" stroke-width="2.2"
-                          stroke-linecap="round"/>
-                    <circle cx="24" cy="8" r="2.5" fill="#e06445"/>
-                </svg>
+                <img src="{{ asset('images/sigana-mark.svg') }}" alt="" style="width:25px;height:25px">
             </div>
             <div>
                 <h2 class="brand-name">SIGANA</h2>
@@ -1011,6 +951,9 @@
             <a class="active" href="{{ auth()->check() ? route('dashboard') : route('guest.home') }}">
                 <span>⌂</span> Dashboard
             </a>
+            <a class="{{ request()->routeIs('peta.*') ? 'active' : '' }}" href="{{ route('peta.index') }}">
+                <span>◎</span> Peta
+            </a>
             <a href="{{ route('bencana.index') }}">
                 <span>⚠</span> Bencana
             </a>
@@ -1020,6 +963,10 @@
             <a href="{{ route('bantuan.index') }}">
                 <span>◌</span> Bantuan
             </a>
+            <a class="{{ request()->routeIs('bantuan.report.form') ? 'active' : '' }}" href="{{ route('bantuan.report.form') }}">
+                <span>＋</span> Lapor Bencana
+            </a>
+            <a class="{{ request()->routeIs('damage-scan.*') ? 'active' : '' }}" href="{{ route('damage-scan.index') }}"><span>⌕</span> Scan Kerusakan</a>
             <a href="{{ route('profil.index') }}">
     <span>♙</span> Profil
 </a>
@@ -1213,25 +1160,6 @@
                 </div>
             </article>
 
-            <article class="panel map-panel" id="map">
-                <div class="panel-heading">
-                    <div class="map-heading-copy">
-                        <h2>Peta kejadian bencana</h2>
-                        <p>Lokasi laporan bencana yang memiliki koordinat</p>
-                    </div>
-                    <span class="map-region">Indonesia</span>
-                </div>
-                <div class="map-stage">
-                    <div id="sigana-map" aria-label="Peta lokasi kejadian bencana"></div>
-                    <div class="map-state" id="mapState" role="status">Memuat peta…</div>
-                    <div class="map-legend-control" aria-label="Lokasi kejadian bencana">
-                        <i class="map-legend-dot"></i>
-                        <span>Lokasi kejadian</span>
-                        <strong>{{ $mapDisasters->count() }}</strong>
-                    </div>
-                </div>
-                <p class="map-empty-note" id="mapEmptyNote" hidden>Belum ada kejadian terverifikasi dengan koordinat yang aktif di peta.</p>
-            </article>
         </section>
     </main>
 </div>
@@ -1441,62 +1369,6 @@
         }
     });
 </script>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    (function () {
-        const state = document.getElementById('mapState');
-        const emptyNote = document.getElementById('mapEmptyNote');
-        const points = @json($mapDisasters);
-        function showMapState(message) { state.textContent = message; state.hidden = false; }
-        if (typeof L === 'undefined') {
-            showMapState('Peta tidak dapat dimuat. Periksa koneksi internet lalu muat ulang halaman.');
-            return;
-        }
-        try {
-            const map = L.map('sigana-map', { zoomControl: false, markerZoomAnimation: false }).setView([-2.5, 118], 4);
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' }).addTo(map);
-            const markers = [];
-            let tileLoaded = false;
-            const loadingTimeout = window.setTimeout(function () { if (!tileLoaded) showMapState('Peta dasar belum merespons. Coba muat ulang atau periksa koneksi internet.'); }, 10000);
-            tiles.once('load', function () { tileLoaded = true; window.clearTimeout(loadingTimeout); state.hidden = true; });
-            tiles.once('tileerror', function () { if (!tileLoaded) showMapState('Sebagian peta gagal dimuat. Periksa koneksi internet.'); });
-            function markerStyleForCategory(category) {
-                const name = String(category || '').toLocaleLowerCase('id');
-                if (name.includes('gunung') || name.includes('vulkan')) return { icon: '🌋', color: '#c84b37' };
-                if (name.includes('tsunami')) return { icon: '🌊', color: '#2867a8' };
-                if (name.includes('banjir')) return { icon: '💧', color: '#1685a0' };
-                if (name.includes('gempa')) return { icon: '🏚️', color: '#b87818' };
-                if (name.includes('longsor')) return { icon: '⛰️', color: '#795548' };
-                return { icon: '⚠️', color: '#105461' };
-            }
-            function makePopup(disaster) {
-                const content = document.createElement('div');
-                const title = document.createElement('strong'); title.textContent = disaster.title || 'Kejadian bencana';
-                const location = document.createElement('div'); location.className = 'map-popup-location'; location.textContent = [disaster.category, disaster.location].filter(Boolean).join(' · ');
-                const status = document.createElement('span'); status.className = 'map-popup-status'; status.textContent = disaster.status || 'Disetujui';
-                content.append(title, location, status);
-                if (disaster.occurred_at) { const time = document.createElement('div'); time.className = 'map-popup-time'; time.textContent = 'Waktu kejadian: ' + disaster.occurred_at; content.append(time); }
-                const link = document.createElement('a'); link.className = 'map-popup-link'; link.href = disaster.url; link.textContent = 'Lihat detail kejadian →'; content.append(link);
-                return content;
-            }
-            points.forEach(function (disaster) {
-                const style = markerStyleForCategory(disaster.category);
-                const icon = L.divIcon({ className: 'sigana-disaster-marker', html: `<span style="background:${style.color}">${style.icon}</span>`, iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16] });
-                markers.push(L.marker([disaster.latitude, disaster.longitude], { icon: icon }).addTo(map).bindPopup(makePopup(disaster), { maxWidth: 280 }));
-            });
-            emptyNote.hidden = markers.length > 0;
-            if (markers.length === 1) map.setView(markers[0].getLatLng(), 6);
-            else if (markers.length > 1) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.18), { maxZoom: 7 });
-            window.setTimeout(function () { map.invalidateSize(); }, 100);
-        } catch (error) {
-            console.error('SIGANA map initialization failed:', error);
-            showMapState('Peta mengalami kendala saat dibuka. Muat ulang halaman untuk mencoba lagi.');
-        }
-    })();
-</script>
-
 
 </body>
 </html>

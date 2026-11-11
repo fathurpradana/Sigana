@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\DisasterCategoryScope;
 
 class AdminController extends Controller
 {
@@ -14,17 +15,26 @@ class AdminController extends Controller
     {
         $stats = [
             'users' => DB::table('users')->count(),
-            'disasters' => DB::table('disasters')->count(),
-            'pending_reports' => DB::table('disasters')->where('verification_status', 'Menunggu')->count(),
-            'categories' => DB::table('disaster_categories')->count(),
+            'disasters' => DisasterCategoryScope::apply(DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id'), 'c.name')->count(),
+            'pending_reports' => DisasterCategoryScope::apply(DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id'), 'c.name')->where('d.verification_status', 'Menunggu')->count(),
+            'categories' => DisasterCategoryScope::query()->count(),
         ];
 
-        $categories = DB::table('disaster_categories')->orderBy('name')->get();
-        $disasters = DB::table('disasters as d')->leftJoin('disaster_categories as c', 'c.id', '=', 'd.category_id')
+        $categories = DisasterCategoryScope::query()->orderBy('name')->get();
+        $disastersQuery = DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id');
+        DisasterCategoryScope::apply($disastersQuery, 'c.name');
+        $disasters = $disastersQuery
             ->select('d.*', 'c.name as category_name')
             ->orderByRaw("CASE d.verification_status WHEN 'Menunggu' THEN 0 WHEN 'Ditolak' THEN 1 ELSE 2 END")
             ->orderByDesc('d.created_at')->get();
-        $tips = DB::table('mitigations as m')->leftJoin('disaster_categories as c', 'c.id', '=', 'm.category_id')
+        $tipsQuery = DB::table('mitigations as m')->leftJoin('disaster_categories as c', 'c.id', '=', 'm.category_id');
+        $tipsQuery->where(function ($query) {
+            $query->whereNull('m.category_id')
+                ->orWhere(function ($focusedCategories) {
+                    DisasterCategoryScope::apply($focusedCategories, 'c.name');
+                });
+        });
+        $tips = $tipsQuery
             ->select('m.*', 'c.name as category_name')->orderBy('m.phase')->orderByDesc('m.id')->get();
         $contacts = DB::table('emergency_contacts')->orderBy('name')->get();
         $information = DB::table('general_information')->orderByDesc('published_at')->orderByDesc('id')->get();
@@ -47,6 +57,7 @@ class AdminController extends Controller
 
     public function updateDisaster(Request $request, int $id)
     {
+        abort_unless($this->focusedDisasterExists($id), 404);
         $data = $this->validateDisaster($request, false);
         $data['occurred_at'] = Carbon::parse($data['occurred_at'], 'Asia/Jakarta')->utc();
         $data['updated_at'] = now();
@@ -62,6 +73,7 @@ class AdminController extends Controller
 
     public function destroyDisaster(int $id)
     {
+        abort_unless($this->focusedDisasterExists($id), 404);
         $photo = DB::table('disasters')->where('id', $id)->value('photo');
         abort_unless(DB::table('disasters')->where('id', $id)->exists(), 404);
         DB::table('disasters')->where('id', $id)->delete();
@@ -71,7 +83,7 @@ class AdminController extends Controller
 
     private function validateDisaster(Request $request, bool $photoRequired = true): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'category_id' => ['required', 'integer', 'exists:disaster_categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
@@ -82,6 +94,14 @@ class AdminController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'photo' => [$photoRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
+
+        abort_unless(
+            DisasterCategoryScope::query()->where('id', $data['category_id'])->exists(),
+            422,
+            'Panel SIGANA saat ini hanya menerima kategori Banjir dan Gempa.'
+        );
+
+        return $data;
     }
 
     public function verifyDisaster(Request $request, int $id)
@@ -95,6 +115,7 @@ class AdminController extends Controller
         $disaster = DB::table('disasters as d')
             ->join('disaster_categories as c', 'c.id', '=', 'd.category_id')
             ->where('d.id', $id)
+            ->where(function ($query) { DisasterCategoryScope::apply($query, 'c.name'); })
             ->select('d.id', 'd.title', 'd.location', 'd.verification_status', 'd.approved_at', 'c.name as category')
             ->first();
         abort_unless($disaster, 404);
@@ -138,6 +159,7 @@ class AdminController extends Controller
     public function storeCategory(Request $request)
     {
         $data = $request->validate(['name' => ['required', 'string', 'max:100', 'unique:disaster_categories,name'], 'description' => ['nullable', 'string', 'max:2000']]);
+        $this->ensureFocusedCategoryName($data['name']);
         $data['created_at'] = $data['updated_at'] = now();
         DB::table('disaster_categories')->insert($data);
         return $this->back('Kategori berhasil ditambahkan.', 'kategori-admin');
@@ -146,7 +168,8 @@ class AdminController extends Controller
     public function updateCategory(Request $request, int $id)
     {
         $data = $request->validate(['name' => ['required', 'string', 'max:100', Rule::unique('disaster_categories', 'name')->ignore($id)], 'description' => ['nullable', 'string', 'max:2000']]);
-        abort_unless(DB::table('disaster_categories')->where('id', $id)->exists(), 404);
+        abort_unless(DisasterCategoryScope::query()->where('id', $id)->exists(), 404);
+        $this->ensureFocusedCategoryName($data['name']);
         $data['updated_at'] = now();
         DB::table('disaster_categories')->where('id', $id)->update($data);
         return $this->back('Kategori berhasil diperbarui.', 'kategori-admin');
@@ -154,6 +177,7 @@ class AdminController extends Controller
 
     public function destroyCategory(int $id)
     {
+        abort_unless(DisasterCategoryScope::query()->where('id', $id)->exists(), 404);
         if (DB::table('disasters')->where('category_id', $id)->exists() || DB::table('mitigations')->where('category_id', $id)->exists()) {
             return $this->back('Kategori masih dipakai oleh berita atau tips, jadi tidak dapat dihapus.', 'kategori-admin');
         }
@@ -172,7 +196,7 @@ class AdminController extends Controller
     public function updateTip(Request $request, int $id)
     {
         $data = $this->validateTip($request);
-        abort_unless(DB::table('mitigations')->where('id', $id)->exists(), 404);
+        abort_unless($this->focusedTipExists($id), 404);
         $data['updated_at'] = now();
         DB::table('mitigations')->where('id', $id)->update($data);
         return $this->back('Tips keselamatan berhasil diperbarui.', 'tips-admin');
@@ -180,17 +204,57 @@ class AdminController extends Controller
 
     private function validateTip(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:disaster_categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'phase' => ['required', Rule::in(['Sebelum', 'Saat', 'Sesudah'])],
             'content' => ['required', 'string', 'max:10000'],
             'image' => ['nullable', 'string', 'max:255'],
         ]);
+
+        if (! empty($data['category_id'])) {
+            abort_unless(
+                DisasterCategoryScope::query()->where('id', $data['category_id'])->exists(),
+                422,
+                'Tips hanya dapat dihubungkan ke kategori Banjir atau Gempa.'
+            );
+        }
+
+        return $data;
+    }
+
+    private function focusedDisasterExists(int $id): bool
+    {
+        $query = DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id')->where('d.id', $id);
+        DisasterCategoryScope::apply($query, 'c.name');
+        return $query->exists();
+    }
+
+    private function focusedTipExists(int $id): bool
+    {
+        $query = DB::table('mitigations as m')
+            ->leftJoin('disaster_categories as c', 'c.id', '=', 'm.category_id')
+            ->where('m.id', $id)
+            ->where(function ($scope) {
+                $scope->whereNull('m.category_id')
+                    ->orWhere(function ($focusedCategories) {
+                        DisasterCategoryScope::apply($focusedCategories, 'c.name');
+                    });
+            });
+
+        return $query->exists();
+    }
+
+    private function ensureFocusedCategoryName(string $name): void
+    {
+        $normalized = mb_strtolower(trim($name));
+        abort_unless($normalized === 'banjir' || str_starts_with($normalized, 'gempa'), 422,
+            'Kategori yang tersedia hanya Banjir dan Gempa.');
     }
 
     public function destroyTip(int $id)
     {
+        abort_unless($this->focusedTipExists($id), 404);
         DB::table('mitigations')->where('id', $id)->delete();
         return $this->back('Tips keselamatan berhasil dihapus.', 'tips-admin');
     }

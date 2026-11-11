@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use App\Support\DisasterCategoryScope;
 
 class AdminDashboardController extends Controller
 {
@@ -10,9 +11,9 @@ class AdminDashboardController extends Controller
     {
         $stats = [
             'users' => DB::table('users')->count(),
-            'disasters' => DB::table('disasters')->count(),
-            'pending_reports' => DB::table('disasters')->where('verification_status', 'Menunggu')->count(),
-            'categories' => DB::table('disaster_categories')->count(),
+            'disasters' => DisasterCategoryScope::apply(DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id'), 'c.name')->count(),
+            'pending_reports' => DisasterCategoryScope::apply(DB::table('disasters as d')->join('disaster_categories as c', 'c.id', '=', 'd.category_id'), 'c.name')->where('d.verification_status', 'Menunggu')->count(),
+            'categories' => DisasterCategoryScope::query()->count(),
         ];
 
         return view('admin.dashboard', compact('stats'));
